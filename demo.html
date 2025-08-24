@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InAppBrowserEscaper Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .demo-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #0056CC;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        pre {
+            background: #f8f8f8;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌐 InAppBrowserEscaper Demo</h1>
+    
+    <div class="info">
+        <h3>Current Browser Status</h3>
+        <p id="browser-info">Loading...</p>
+    </div>
+
+    <div class="demo-section">
+        <h2>🔧 Test Controls</h2>
+        <p>Use these buttons to test different scenarios:</p>
+        
+        <button class="button" onclick="testBasicEscape()">
+            Show Basic Escape Modal
+        </button>
+        
+        <button class="button" onclick="testCustomEscape()">
+            Show Custom Escape Modal
+        </button>
+        
+        <button class="button" onclick="testAutoRedirect()">
+            Test Auto Redirect
+        </button>
+        
+        <button class="button" onclick="testCopyUrl()">
+            Copy URL to Clipboard
+        </button>
+        
+        <button class="button" onclick="simulateInstagram()">
+            Simulate Instagram Browser
+        </button>
+        
+        <button class="button" onclick="resetUserAgent()">
+            Reset to Normal Browser
+        </button>
+    </div>
+
+    <div class="demo-section">
+        <h2>📱 Simulated In-App Browser Test</h2>
+        <p>To test the library with simulated in-app browsers:</p>
+        <ol>
+            <li>Click "Simulate Instagram Browser" to modify the user agent</li>
+            <li>Try the different escape modal options</li>
+            <li>Check how the detection works</li>
+            <li>Reset when done testing</li>
+        </ol>
+    </div>
+
+    <div class="demo-section">
+        <h2>📊 Detection Results</h2>
+        <div id="detection-results"></div>
+    </div>
+
+    <div class="demo-section">
+        <h2>🔍 Real Testing</h2>
+        <div class="warning">
+            <strong>For real testing:</strong>
+            <ol>
+                <li>Share this page to Instagram, Facebook, or other social apps</li>
+                <li>Open the shared link within the app</li>
+                <li>You should see the escape modal automatically</li>
+                <li>Test the "Open in Browser" functionality</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>💻 Code Examples</h2>
+        
+        <h3>Basic Usage:</h3>
+        <pre><code>import InAppBrowserEscaper, { InAppBrowserDetector } from 'inappbrowserescaper';
+
+// Check if user is in an in-app browser
+if (InAppBrowserDetector.isInAppBrowser()) {
+  // Show escape modal
+  InAppBrowserEscaper.escape();
+}</code></pre>
+
+        <h3>Custom Options:</h3>
+        <pre><code>InAppBrowserEscaper.escape({
+  message: 'For the best experience, please open this in your browser',
+  buttonText: 'Open in Browser',
+  showModal: true,
+  autoRedirect: false
+});</code></pre>
+
+        <h3>Auto-redirect for specific apps:</h3>
+        <pre><code>const browserInfo = InAppBrowserDetector.analyze();
+if (browserInfo.appName === 'instagram') {
+  InAppBrowserEscaper.escape({ autoRedirect: true });
+}</code></pre>
+    </div>
+
+    <!-- Include the built library -->
+    <script src="./dist/browser/inappbrowserescaper.js"></script>
+    
+    <script>
+        // Initialize demo
+        let originalUserAgent = navigator.userAgent;
+        
+        // Access the library from the global scope
+        const { InAppBrowserDetector, InAppBrowserEscaper } = window.InAppBrowserEscaper;
+        
+        function updateBrowserInfo() {
+            const info = InAppBrowserDetector.analyze();
+            const infoElement = document.getElementById('browser-info');
+            
+            let statusHtml = `
+                <strong>Is In-App Browser:</strong> ${info.isInApp ? '✅ Yes' : '❌ No'}<br>
+                <strong>Platform:</strong> ${info.platform}<br>
+                <strong>App Name:</strong> ${info.appName || 'N/A'}<br>
+                <strong>User Agent:</strong> <code style="font-size: 12px;">${info.userAgent}</code>
+            `;
+            
+            infoElement.innerHTML = statusHtml;
+            updateDetectionResults(info);
+        }
+        
+        function updateDetectionResults(info) {
+            const resultsElement = document.getElementById('detection-results');
+            
+            const patterns = {
+                instagram: /instagram/i,
+                facebook: /FBAN|FBAV|FB_IAB/i,
+                twitter: /TwitterAndroid|Twitter for iPhone/i,
+                telegram: /TelegramBot/i,
+                whatsapp: /WhatsApp/i,
+                snapchat: /Snapchat/i,
+                tiktok: /musical_ly|TikTok/i,
+                linkedin: /LinkedInApp/i,
+                wechat: /MicroMessenger/i
+            };
+            
+            let resultsHtml = '<h3>Pattern Matching Results:</h3>';
+            for (const [app, pattern] of Object.entries(patterns)) {
+                const matches = pattern.test(navigator.userAgent);
+                resultsHtml += `<div style="margin: 5px 0;">
+                    <strong>${app}:</strong> ${matches ? '✅ Match' : '❌ No Match'}
+                </div>`;
+            }
+            
+            resultsElement.innerHTML = resultsHtml;
+        }
+        
+        function testBasicEscape() {
+            InAppBrowserEscaper.escape();
+        }
+        
+        function testCustomEscape() {
+            InAppBrowserEscaper.escape({
+                message: '🛍️ For secure checkout and the best shopping experience, please open this in your browser',
+                buttonText: '🔒 Shop Securely',
+                showModal: true
+            });
+        }
+        
+        function testAutoRedirect() {
+            if (InAppBrowserDetector.isInAppBrowser()) {
+                InAppBrowserEscaper.escape({
+                    autoRedirect: true,
+                    showModal: false
+                });
+            } else {
+                alert('Auto-redirect only works in in-app browsers. Try simulating an in-app browser first.');
+            }
+        }
+        
+        async function testCopyUrl() {
+            const success = await InAppBrowserEscaper.copyUrlToClipboard();
+            if (success) {
+                showMessage('✅ URL copied to clipboard!', 'success');
+            } else {
+                showMessage('❌ Failed to copy URL', 'warning');
+            }
+        }
+        
+        function simulateInstagram() {
+            // Override the userAgent temporarily for testing
+            Object.defineProperty(navigator, 'userAgent', {
+                value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 154.0.0.37.120',
+                configurable: true
+            });
+            updateBrowserInfo();
+            showMessage('📱 Simulating Instagram in-app browser', 'info');
+        }
+        
+        function resetUserAgent() {
+            Object.defineProperty(navigator, 'userAgent', {
+                value: originalUserAgent,
+                configurable: true
+            });
+            updateBrowserInfo();
+            showMessage('🔄 Reset to normal browser', 'info');
+        }
+        
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.innerHTML = message;
+            messageDiv.style.position = 'fixed';
+            messageDiv.style.top = '20px';
+            messageDiv.style.right = '20px';
+            messageDiv.style.zIndex = '999999';
+            messageDiv.style.maxWidth = '300px';
+            
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+        
+        // Auto-detection on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBrowserInfo();
+            
+            // Auto-show escape modal if actually in in-app browser
+            if (InAppBrowserDetector.isInAppBrowser()) {
+                setTimeout(() => {
+                    InAppBrowserEscaper.escape({
+                        message: '🎉 Welcome to the InAppBrowserEscaper demo! You\'re currently in an in-app browser.',
+                        buttonText: '🌐 Open in Browser'
+                    });
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>

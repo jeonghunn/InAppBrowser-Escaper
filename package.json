@@ -1,0 +1,84 @@
+{
+  "name": "inappbrowserescaper",
+  "version": "0.0.1",
+  "description": "A TypeScript library to help users escape from in-app browsers like Instagram, Facebook, Telegram, etc.",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src/react.tsx",
+    "src/angular.ts",
+    "src/examples",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rimraf dist && npm run build:node && npm run build:browser && npm run build:react && npm run copy:browser-manual",
+    "build:node": "tsc",
+    "build:browser": "tsc -p tsconfig.browser.json",
+    "copy:browser-manual": "mkdir -p dist/browser && cp src/browser/inappbrowserescaper.js dist/browser/",
+    "build:react": "tsc -p tsconfig.react.json",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "prepublishOnly": "npm run build && npm test",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "in-app-browser",
+    "instagram",
+    "facebook",
+    "telegram",
+    "whatsapp",
+    "browser-escape",
+    "mobile",
+    "typescript",
+    "react",
+    "angular"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/inappbrowserescaper.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/inappbrowserescaper/issues"
+  },
+  "homepage": "https://github.com/yourusername/inappbrowserescaper#readme",
+  "peerDependencies": {
+    "@angular/common": ">=12.0.0",
+    "@angular/core": ">=12.0.0",
+    "react": ">=16.8.0",
+    "rxjs": ">=6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "@angular/core": {
+      "optional": true
+    },
+    "@angular/common": {
+      "optional": true
+    },
+    "rxjs": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^24.2.1",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5",
+    "jsdom": "^26.1.0",
+    "rimraf": "^6.0.1",
+    "ts-jest": "^29.4.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
