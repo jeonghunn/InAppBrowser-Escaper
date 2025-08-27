@@ -7,7 +7,15 @@ yarn-error.log*
 # Build outputs
 dist/
 build/
+src/browser/
 *.tsbuildinfo
+*.js
+*.js.map
+
+# But keep config files
+!*.config.js
+!jest.config.js
+!webpack.config.js
 
 # Runtime data
 pids
