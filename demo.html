@@ -31,6 +31,31 @@
         .button:hover {
             background: #0056CC;
         }
+        .button.secondary {
+            background: #34C759;
+        }
+        .button.secondary:hover {
+            background: #28A745;
+        }
+        .button.tertiary {
+            background: #FF9500;
+        }
+        .button.tertiary:hover {
+            background: #E6850E;
+        }
+        .scheme-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: white;
+            margin: 10px 0;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
         .info {
             background: #e3f2fd;
             padding: 15px;
@@ -69,21 +94,28 @@
         <h2>🔧 Test Controls</h2>
         <p>Use these buttons to test different scenarios:</p>
         
-        <button class="button" onclick="testBasicEscape()">
-            Show Basic Escape Modal
-        </button>
-        
-        <button class="button" onclick="testCustomEscape()">
-            Show Custom Escape Modal
-        </button>
-        
-        <button class="button" onclick="testAutoRedirect()">
-            Test Auto Redirect
-        </button>
-        
-        <button class="button" onclick="testCopyUrl()">
-            Copy URL to Clipboard
-        </button>
+        <div class="test-grid">
+            <button class="button" onclick="testBasicEscape()">
+                Show Basic Escape Modal
+            </button>
+            
+            <button class="button" onclick="testCustomEscape()">
+                Show Custom Escape Modal
+            </button>
+            
+            <button class="button" onclick="testAutoRedirect()">
+                Test Auto Redirect
+            </button>
+            
+            <button class="button secondary" onclick="testForceEscape()">
+                🚀 Test Enhanced Force Escape
+            </button>
+            
+            <button class="button" onclick="testCopyUrl()">
+                Copy URL to Clipboard
+            </button>
+        </div>
+    </div>
         
         <button class="button" onclick="simulateInstagram()">
             Simulate Instagram Browser
@@ -95,30 +127,48 @@
     </div>
 
     <div class="demo-section">
-        <h2>📱 Simulated In-App Browser Test</h2>
-        <p>To test the library with simulated in-app browsers:</p>
-        <ol>
-            <li>Click "Simulate Instagram Browser" to modify the user agent</li>
-            <li>Try the different escape modal options</li>
-            <li>Check how the detection works</li>
-            <li>Reset when done testing</li>
-        </ol>
+        <h2>📱 Simulate Different In-App Browsers</h2>
+        <p>Test the library with different simulated in-app browsers:</p>
+        
+        <div class="test-grid">
+            <button class="button" onclick="simulateInstagram()">
+                📷 Instagram Browser
+            </button>
+            
+            <button class="button" onclick="simulateFacebook()">
+                👥 Facebook Browser
+            </button>
+            
+            <button class="button" onclick="simulateTikTok()">
+                🎵 TikTok Browser
+            </button>
+            
+            <button class="button" onclick="simulateTwitter()">
+                🐦 Twitter Browser
+            </button>
+            
+            <button class="button" onclick="resetUserAgent()">
+                🔄 Reset to Normal Browser
+            </button>
+        </div>
     </div>
 
     <div class="demo-section">
-        <h2>📊 Detection Results</h2>
+        <h2>📊 Live Detection Results</h2>
         <div id="detection-results"></div>
+        <div id="test-results" style="margin-top: 15px;"></div>
     </div>
 
     <div class="demo-section">
-        <h2>🔍 Real Testing</h2>
+        <h2>🔍 Real Device Testing</h2>
         <div class="warning">
-            <strong>For real testing:</strong>
+            <strong>For comprehensive testing:</strong>
             <ol>
-                <li>Share this page to Instagram, Facebook, or other social apps</li>
-                <li>Open the shared link within the app</li>
-                <li>You should see the escape modal automatically</li>
-                <li>Test the "Open in Browser" functionality</li>
+                <li><strong>iOS Testing:</strong> Share this page to Instagram, Facebook, or TikTok on iPhone/iPad</li>
+                <li><strong>Android Testing:</strong> Open the shared link within social media apps</li>
+                <li><strong>Safari Schemes:</strong> Test the orange "Safari URL Scheme" buttons on iOS</li>
+                <li><strong>Enhanced Escape:</strong> Try the "🚀 Enhanced Force Escape" button</li>
+                <li><strong>Monitor Results:</strong> Check console logs for detailed strategy information</li>
             </ol>
         </div>
     </div>
@@ -202,14 +252,19 @@ if (browserInfo.appName === 'instagram') {
         }
         
         function testBasicEscape() {
-            InAppBrowserEscaper.escape();
+            const url = 'https://www.google.com';
+            addTestResult(`🧪 Testing basic escape with URL: ${url}`);
+            InAppBrowserEscaper.escape({
+                fallbackUrl: url
+            });
         }
         
         function testCustomEscape() {
             InAppBrowserEscaper.escape({
                 message: '🛍️ For secure checkout and the best shopping experience, please open this in your browser',
                 buttonText: '🔒 Shop Securely',
-                showModal: true
+                showModal: true,
+                fallbackUrl: 'https://www.example.com'
             });
         }
         
@@ -217,11 +272,37 @@ if (browserInfo.appName === 'instagram') {
             if (InAppBrowserDetector.isInAppBrowser()) {
                 InAppBrowserEscaper.escape({
                     autoRedirect: true,
-                    showModal: false
+                    showModal: false,
+                    fallbackUrl: 'https://www.google.com'
                 });
+                addTestResult('Auto-redirect attempted with enhanced strategies');
             } else {
                 alert('Auto-redirect only works in in-app browsers. Try simulating an in-app browser first.');
             }
+        }
+        
+        function testForceEscape() {
+            addTestResult('🚀 Testing enhanced force escape with all Safari schemes...');
+            InAppBrowserEscaper.forceEscape('https://www.example.com');
+            addTestResult('Force escape completed - check console for strategy details');
+        }
+        
+        function testSafariHttpsScheme() {
+            const url = 'https://www.google.com';
+            const schemeUrl = url.replace(/^https:\/\//, 'x-safari-https://');
+            addTestResult(`Testing: ${schemeUrl}`);
+            setTimeout(() => {
+                window.location.href = schemeUrl;
+            }, 1000);
+        }
+        
+        function testSafariHttpScheme() {
+            const url = 'http://example.com';
+            const schemeUrl = url.replace(/^http:\/\//, 'x-safari-http://');
+            addTestResult(`Testing: ${schemeUrl}`);
+            setTimeout(() => {
+                window.location.href = schemeUrl;
+            }, 1000);
         }
         
         async function testCopyUrl() {
@@ -236,11 +317,42 @@ if (browserInfo.appName === 'instagram') {
         function simulateInstagram() {
             // Override the userAgent temporarily for testing
             Object.defineProperty(navigator, 'userAgent', {
-                value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 154.0.0.37.120',
+                value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 200.0.0.28.127',
                 configurable: true
             });
             updateBrowserInfo();
-            showMessage('📱 Simulating Instagram in-app browser', 'info');
+            showMessage('📱 Simulating Instagram in-app browser on iOS', 'info');
+            addTestResult('📷 Instagram browser simulation activated');
+        }
+        
+        function simulateFacebook() {
+            Object.defineProperty(navigator, 'userAgent', {
+                value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 [FBAN/FBIOS;FBDV/iPhone13,2;FBMD/iPhone;FBSN/iOS;FBSV/15.0;FBSS/3;FBID/phone;FBLC/en_US;FBOP/5]',
+                configurable: true
+            });
+            updateBrowserInfo();
+            showMessage('📱 Simulating Facebook in-app browser on iOS', 'info');
+            addTestResult('👥 Facebook browser simulation activated');
+        }
+        
+        function simulateTikTok() {
+            Object.defineProperty(navigator, 'userAgent', {
+                value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 musical_ly_2021',
+                configurable: true
+            });
+            updateBrowserInfo();
+            showMessage('📱 Simulating TikTok in-app browser on iOS', 'info');
+            addTestResult('🎵 TikTok browser simulation activated');
+        }
+        
+        function simulateTwitter() {
+            Object.defineProperty(navigator, 'userAgent', {
+                value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Twitter for iPhone',
+                configurable: true
+            });
+            updateBrowserInfo();
+            showMessage('📱 Simulating Twitter in-app browser on iOS', 'info');
+            addTestResult('🐦 Twitter browser simulation activated');
         }
         
         function resetUserAgent() {
@@ -250,6 +362,25 @@ if (browserInfo.appName === 'instagram') {
             });
             updateBrowserInfo();
             showMessage('🔄 Reset to normal browser', 'info');
+            addTestResult('🔄 Browser reset to normal state');
+        }
+        
+        function addTestResult(message, success = true) {
+            const resultsEl = document.getElementById('test-results');
+            if (!resultsEl) return;
+            
+            const resultDiv = document.createElement('div');
+            resultDiv.style.cssText = `
+                padding: 8px 12px;
+                margin: 5px 0;
+                border-radius: 4px;
+                background: ${success ? '#e8f5e8' : '#ffe8e8'};
+                border-left: 4px solid ${success ? '#4caf50' : '#f44336'};
+                font-size: 14px;
+            `;
+            resultDiv.innerHTML = `${success ? '✅' : '❌'} ${message} <small>(${new Date().toLocaleTimeString()})</small>`;
+            resultsEl.appendChild(resultDiv);
+            resultsEl.scrollTop = resultsEl.scrollHeight;
         }
         
         function showMessage(message, type) {
@@ -272,15 +403,30 @@ if (browserInfo.appName === 'instagram') {
         // Auto-detection on page load
         document.addEventListener('DOMContentLoaded', function() {
             updateBrowserInfo();
+            addTestResult('🌐 InAppBrowserEscaper Demo loaded successfully');
+            
+            // Show platform and capabilities info
+            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const isInApp = InAppBrowserDetector.isInAppBrowser();
+            
+            addTestResult(`Platform: ${isIOS ? 'iOS ✅' : 'Other'}, In-App Browser: ${isInApp ? 'Yes ✅' : 'No'}`);
+            
+            if (isIOS) {
+                addTestResult('✅ Safari URL schemes available - try the orange buttons!');
+            } else {
+                addTestResult('⚠️ Safari URL schemes work best on iOS devices');
+            }
             
             // Auto-show escape modal if actually in in-app browser
-            if (InAppBrowserDetector.isInAppBrowser()) {
+            if (isInApp) {
                 setTimeout(() => {
                     InAppBrowserEscaper.escape({
-                        message: '🎉 Welcome to the InAppBrowserEscaper demo! You\'re currently in an in-app browser.',
-                        buttonText: '🌐 Open in Browser'
+                        message: '🎉 Welcome to the InAppBrowserEscaper demo! You\'re currently in an in-app browser. This modal demonstrates the enhanced escape functionality with multiple Safari URL schemes.',
+                        buttonText: '🚀 Open in Browser (Enhanced)',
+                        fallbackUrl: 'https://www.google.com'
                     });
-                }, 1000);
+                    addTestResult('🎉 Auto-showed enhanced escape modal for in-app browser');
+                }, 1500);
             }
         });
     </script>
