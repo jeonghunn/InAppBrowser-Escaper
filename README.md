@@ -18,17 +18,15 @@ A lightweight TypeScript library that helps users escape from in-app browsers (I
 
 ## 📱 Supported In-App Browsers
 
-- Instagram
-- Facebook
-- Twitter
-- Telegram
-- WhatsApp
-- Snapchat
-- TikTok
-- LinkedIn
-- WeChat
-- Line
-- KakaoTalk
+- Instagram (iOS ✅, Android ✅)
+- Facebook (iOS ✅, Android )
+- Facebook Messanger (iOS ❌, Android ✅)
+- Telegram (iOS ✅, Android ❌)
+- Snapchat (iOS ❌, Android ❌)
+- LinkedIn (iOS ✅, Android ❌)
+- Line (iOS ✅, Android ✅)
+- KakaoTalk (iOS ✅, Android ✅)
+- Chrome Custom Tab (Android ❌)
 
 ## 📦 Installation
 
