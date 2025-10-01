@@ -14,10 +14,10 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "rimraf dist && npm run build:node && npm run build:browser && npm run build:react && npm run copy:browser-manual",
+    "build": "rimraf dist && npm run build:node && npm run build:browser && npm run build:react && npm run build:browser-wrapper",
     "build:node": "tsc",
     "build:browser": "tsc -p tsconfig.browser.json",
-    "copy:browser-manual": "mkdir -p dist/browser && cp src/browser/inappbrowserescaper.js dist/browser/",
+    "build:browser-wrapper": "node scripts/build-browser.js",
     "build:react": "tsc -p tsconfig.react.json",
     "test": "jest",
     "test:watch": "jest --watch",
