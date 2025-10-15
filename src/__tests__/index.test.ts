@@ -50,6 +50,122 @@ describe('InAppBrowserDetector', () => {
       const result = InAppBrowserDetector.analyze();
       expect(result.platform).toBe('android');
     });
+
+    it('should detect Android WebView (TelegramBot pattern)', () => {
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Mobile Safari/537.36 TelegramBot (like TwitterBot)',
+        writable: true,
+      });
+
+      const result = InAppBrowserDetector.analyze();
+      expect(result.isInApp).toBe(false); // TelegramBot is not a webview, it's a bot crawler
+      expect(result.platform).toBe('android');
+      expect(result.appName).toBeUndefined();
+    });
+
+    it('should detect Android WebView with Telegram keyword in user agent', () => {
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.6723.58 Mobile Safari/537.36',
+        writable: true,
+      });
+
+      const result = InAppBrowserDetector.analyze();
+      expect(result.isInApp).toBe(true);
+      expect(result.platform).toBe('android');
+      expect(result.appName).toBe('android_webview');
+    });
+
+    it('should detect Chrome Custom Tabs', () => {
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/91.0.4472.164 Mobile Safari/537.36; wv)',
+        writable: true,
+      });
+
+      const result = InAppBrowserDetector.analyze();
+      expect(result.isInApp).toBe(true);
+      expect(result.platform).toBe('android');
+      expect(result.appName).toBe('chrome_custom_tabs');
+    });
+
+    it('should NOT detect bot crawlers as in-app browsers', () => {
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'TelegramBot (like TwitterBot)',
+        writable: true,
+      });
+
+      const result = InAppBrowserDetector.analyze();
+      expect(result.isInApp).toBe(false);
+      expect(result.appName).toBeUndefined();
+    });
+
+    it('should detect Android WebView with real-world generic user agent', () => {
+      // This is the actual user agent from user's Telegram in-app browser
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Linux; Android 15; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.207 Mobile Safari/537.36',
+        writable: true,
+      });
+
+      const result = InAppBrowserDetector.analyze();
+      expect(result.isInApp).toBe(true);
+      expect(result.appName).toBe('android_webview');
+    });
+
+    it('should detect Android WebView with generic user agent when visiting any domain', () => {
+      // Generic Chrome user agent with suspicious single-letter device model
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.6723.58 Mobile Safari/537.36',
+        writable: true,
+      });
+
+      const result = InAppBrowserDetector.analyze();
+      expect(result.isInApp).toBe(true);
+      expect(result.appName).toBe('android_webview');
+    });
+
+    it('should detect Android WebView with real user agent from Telegram', () => {
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Linux; Android 15; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.207 Mobile Safari/537.36',
+        writable: true,
+      });
+
+      const result = InAppBrowserDetector.analyze();
+      expect(result.isInApp).toBe(true);
+      expect(result.platform).toBe('android');
+      expect(result.appName).toBe('android_webview');
+    });
+
+    it('should detect Android WebView with single letter device model', () => {
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Linux; Android 13; A) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.43 Mobile Safari/537.36',
+        writable: true,
+      });
+
+      const result = InAppBrowserDetector.analyze();
+      expect(result.isInApp).toBe(true);
+      expect(result.appName).toBe('android_webview');
+    });
+
+    it('should NOT detect regular Chrome on real device as WebView', () => {
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Mobile Safari/537.36',
+        writable: true,
+      });
+
+      const result = InAppBrowserDetector.analyze();
+      expect(result.isInApp).toBe(false);
+      expect(result.appName).toBeUndefined();
+    });
+
+    it('should NOT detect Samsung Browser as WebView', () => {
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/14.0 Chrome/87.0.4280.141 Mobile Safari/537.36',
+        writable: true,
+      });
+
+      const result = InAppBrowserDetector.analyze();
+      expect(result.isInApp).toBe(false);
+      expect(result.appName).toBeUndefined();
+    });
   });
 
   describe('isInAppBrowser', () => {

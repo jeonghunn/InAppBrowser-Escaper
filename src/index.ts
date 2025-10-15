@@ -29,7 +29,6 @@ export class InAppBrowserDetector {
     instagram: /instagram/i,
     facebook: /FBAN|FBAV|FB_IAB/i,
     twitter: /TwitterAndroid|Twitter for iPhone/i,
-    telegram: /TelegramBot/i,
     whatsapp: /WhatsApp/i,
     snapchat: /Snapchat/i,
     tiktok: /musical_ly|TikTok/i,
@@ -37,15 +36,20 @@ export class InAppBrowserDetector {
     wechat: /MicroMessenger/i,
     line: /Line/i,
     kakaotalk: /KAKAOTALK/i,
+    chrome_custom_tabs: /; wv\)|CCT|CustomTabsIntent/i,
+    android_webview: /Android.*Chrome\/.*Mobile.*Safari\/537\.36$/i,
   };
 
   /**
    * Analyzes the current browser environment
    */
   static analyze(): BrowserInfo {
-    const userAgent = navigator.userAgent;
+    const userAgent: string = navigator.userAgent;
     
+    // Check for specific app patterns 
     for (const [appName, pattern] of Object.entries(this.IN_APP_PATTERNS)) {
+      if (appName === 'android_webview') continue;
+      
       if (pattern.test(userAgent)) {
         return {
           isInApp: true,
@@ -55,12 +59,62 @@ export class InAppBrowserDetector {
         };
       }
     }
+    
+    // Check for Android WebView as fallback (catches generic in-app browsers)
+    if (this.isAndroidWebView(userAgent)) {
+      return {
+        isInApp: true,
+        platform: this.getPlatform(),
+        userAgent,
+        appName: 'android_webview',
+      };
+    }
 
     return {
       isInApp: false,
       platform: this.getPlatform(),
       userAgent,
     };
+  }
+
+  /**
+   * Detects Android WebView browsers (generic in-app browsers)
+   */
+  private static isAndroidWebView(userAgent: string): boolean {
+    // Must be Android
+    if (!/Android/.test(userAgent)) return false;
+    
+    // Must have Chrome
+    if (!/Chrome\//.test(userAgent)) return false;
+    
+    // Must be mobile
+    if (!/Mobile/.test(userAgent)) return false;
+    
+    // Must end with the standard WebKit suffix
+    if (!/Safari\/537\.36$/.test(userAgent)) return false;
+    
+    // Exclude known real browsers
+    if (/Edge|EdgA|CriOS|FxiOS|OPiOS|SamsungBrowser|MiuiBrowser|Huawei|Mi Browser|Opera|OPR/i.test(userAgent)) {
+      return false;
+    }
+    
+    // Exclude if it has Version/ indicator (real browsers usually have this)
+    if (/Version\/[\d.]+/.test(userAgent)) {
+      return false;
+    }
+    
+    // Look for indicators that suggest this is a WebView rather than a full browser
+    const webViewIndicators = [
+      // Single letter device models (common in WebViews)
+      /Android [^;]+; [A-Z]\)/,
+      // Very generic device models with few characters
+      /Android [^;]+; [A-Z]{1,3}\d*\)/,
+      // Very recent Chrome versions (WebViews often use latest)
+      /Chrome\/1[2-9]\d\./
+    ];
+    
+    // Check if any WebView indicators are present
+    return webViewIndicators.some(indicator => indicator.test(userAgent));
   }
 
   /**
@@ -297,113 +351,114 @@ export class InAppBrowserEscaper {
   private static getRedirectStrategies(url: string, browserInfo: BrowserInfo): Array<() => boolean> {
     const strategies: Array<() => boolean> = [];
 
-    // Platform-specific optimizations (FIRST PRIORITY)
+    // Platform-specific optimizations
     if (browserInfo.platform === 'ios') {
       // iOS-specific strategies - try Safari schemes FIRST
-      strategies.push(
-        Object.assign(() => {
-          // x-safari-https scheme for iOS (most reliable)
-          const safariUrl = url.replace(/^https?:\/\//, 'x-safari-https://');
-          window.location.href = safariUrl;
-          return true;
-        }, { name: 'ios-safari-https-scheme' }),
-        
-        Object.assign(() => {
-          // Alternative: x-safari-http scheme
-          const safariUrl = url.replace(/^https?:\/\//, 'x-safari-http://');
-          window.location.href = safariUrl;
-          return true;
-        }, { name: 'ios-safari-http-scheme' })
-      );
+      const iosSafariHttps = function iosSafariHttps() {
+        // x-safari-https scheme for iOS (most reliable)
+        const safariUrl = url.replace(/^https?:\/\//, 'x-safari-https://');
+        window.location.href = safariUrl;
+        return true;
+      };
+      
+      const iosSafariHttp = function iosSafariHttp() {
+        // Alternative: x-safari-http scheme
+        const safariUrl = url.replace(/^https?:\/\//, 'x-safari-http://');
+        window.location.href = safariUrl;
+        return true;
+      };
+      
+      strategies.push(iosSafariHttps, iosSafariHttp);
     } else if (browserInfo.platform === 'android') {
       // Android-specific strategies - try Android intents FIRST
-      strategies.push(
-        Object.assign(() => {
-          // Try Android intent
-          const intentUrl = `intent://${url.replace(/^https?:\/\//, '')}#Intent;scheme=https;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;S.browser_fallback_url=${encodeURIComponent(url)};end`;
-          window.location.href = intentUrl;
-          return true;
-        }, { name: 'android-intent' })
-      );
+      const androidIntent = function androidIntent() {
+        // Try Android intent
+        const intentUrl = `intent://${url.replace(/^https?:\/\//, '')}#Intent;scheme=https;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;S.browser_fallback_url=${encodeURIComponent(url)};end`;
+        window.location.href = intentUrl;
+        return true;
+      };
+      
+      strategies.push(androidIntent);
     }
 
     // Universal strategies (fallback for all platforms)
+    const windowOpenBlank = function windowOpenBlank() {
+      const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+      if (newWindow && !newWindow.closed) {
+        newWindow.focus();
+        return true;
+      }
+      return false;
+    };
+
+    const windowOpenTop = function windowOpenTop() {
+      const newWindow = window.open(url, '_top');
+      return !!newWindow;
+    };
+
+    const anchorClick = function anchorClick() {
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.target = '_blank';
+      anchor.rel = 'noopener noreferrer';
+      anchor.style.display = 'none';
+      document.body.appendChild(anchor);
+      
+      // Simulate user click
+      const clickEvent = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+        view: window
+      });
+      anchor.dispatchEvent(clickEvent);
+      
+      // Clean up
+      setTimeout(() => document.body.removeChild(anchor), 100);
+      return true;
+    };
+
+    const formSubmit = function formSubmit() {
+      const form = document.createElement('form');
+      form.method = 'GET';
+      form.action = url;
+      form.target = '_blank';
+      form.style.display = 'none';
+      document.body.appendChild(form);
+      form.submit();
+      
+      // Clean up
+      setTimeout(() => document.body.removeChild(form), 100);
+      return true;
+    };
+
+    const locationAssignDelayed = function locationAssignDelayed() {
+      const timeout = setTimeout(() => {
+        window.location.assign(url);
+      }, 100);
+      
+      // Try to open in new window first
+      const newWindow = window.open('', '_blank');
+      if (newWindow) {
+        clearTimeout(timeout);
+        newWindow.location.href = url;
+        newWindow.focus();
+        return true;
+      }
+      return false;
+    };
+
+    const locationHref = function locationHref() {
+      window.location.href = url;
+      return true;
+    };
+
     strategies.push(
-      // Strategy 1: Window.open with different targets
-      Object.assign(() => {
-        const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
-        if (newWindow && !newWindow.closed) {
-          newWindow.focus();
-          return true;
-        }
-        return false;
-      }, { name: 'window-open-blank' }),
-
-      // Strategy 2: Window.open with _top target
-      Object.assign(() => {
-        const newWindow = window.open(url, '_top');
-        return !!newWindow;
-      }, { name: 'window-open-top' }),
-
-      // Strategy 3: Create invisible anchor and click
-      Object.assign(() => {
-        const anchor = document.createElement('a');
-        anchor.href = url;
-        anchor.target = '_blank';
-        anchor.rel = 'noopener noreferrer';
-        anchor.style.display = 'none';
-        document.body.appendChild(anchor);
-        
-        // Simulate user click
-        const clickEvent = new MouseEvent('click', {
-          bubbles: true,
-          cancelable: true,
-          view: window
-        });
-        anchor.dispatchEvent(clickEvent);
-        
-        // Clean up
-        setTimeout(() => document.body.removeChild(anchor), 100);
-        return true;
-      }, { name: 'anchor-click' }),
-
-      // Strategy 4: Form submission method
-      Object.assign(() => {
-        const form = document.createElement('form');
-        form.method = 'GET';
-        form.action = url;
-        form.target = '_blank';
-        form.style.display = 'none';
-        document.body.appendChild(form);
-        form.submit();
-        
-        // Clean up
-        setTimeout(() => document.body.removeChild(form), 100);
-        return true;
-      }, { name: 'form-submit' }),
-
-      // Strategy 5: Location assignment with timeout
-      Object.assign(() => {
-        const timeout = setTimeout(() => {
-          window.location.assign(url);
-        }, 100);
-        
-        // Try to open in new window first
-        const newWindow = window.open('', '_blank');
-        if (newWindow) {
-          clearTimeout(timeout);
-          newWindow.location.href = url;
-          newWindow.focus();
-          return true;
-        }
-        return false;
-      }, { name: 'location-assign-delayed' }),
-
-      // Strategy 6: Direct location change
-      Object.assign(() => {
-        window.location.href = url;
-        return true;
-      }, { name: 'location-href' })
+      windowOpenBlank,
+      windowOpenTop,
+      anchorClick,
+      formSubmit,
+      locationAssignDelayed,
+      locationHref
     );
 
     return strategies;
