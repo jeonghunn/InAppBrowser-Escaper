@@ -221,6 +221,18 @@ if (browserInfo.appName === 'instagram') {
                 <strong>User Agent:</strong> <code style="font-size: 12px;">${info.userAgent}</code>
             `;
             
+            // Add simulate button if not in an in-app browser
+            if (!info.isInApp) {
+                statusHtml += `
+                    <div style="margin-top: 15px;">
+                        <p style="margin-bottom: 10px;"><strong>💡 Tip:</strong> Simulate an in-app browser first for a better demo experience!</p>
+                        <button class="button secondary" onclick="simulateInstagram()" style="margin: 0;">
+                            📱 Simulate In-App Browser
+                        </button>
+                    </div>
+                `;
+            }
+            
             infoElement.innerHTML = statusHtml;
             updateDetectionResults(info);
         }
