@@ -149,8 +149,8 @@ export class InAppBrowserEscaper {
   private static defaultOptions: EscapeOptions = {
     message: 'For the best experience, please open this in your browser',
     buttonText: '🚀 Open in Browser',
-    showModal: true,
-    autoRedirect: false,
+    showModal: false,
+    autoRedirect: true,
   };
 
   /**
