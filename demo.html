@@ -62,6 +62,9 @@
             border-radius: 8px;
             margin: 10px 0;
         }
+        #test-results {
+            margin-top: 15px;
+        }
         .warning {
             background: #fff3e0;
             padding: 15px;
@@ -74,6 +77,15 @@
             border-radius: 8px;
             margin: 10px 0;
         }
+        .simulation-tip {
+            margin-top: 15px;
+        }
+        .simulation-tip p {
+            margin-bottom: 10px;
+        }
+        .simulation-tip button {
+            margin: 0;
+        }
         pre {
             background: #f8f8f8;
             padding: 10px;
@@ -84,7 +96,7 @@
 </head>
 <body>
     <h1>🌐 InAppBrowserEscaper Demo</h1>
-    
+
     <div class="info">
         <h3>Current Browser Status</h3>
         <p id="browser-info">Loading...</p>
@@ -93,50 +105,48 @@
     <div class="demo-section">
         <h2>🔧 Test Controls</h2>
         <p>Use these buttons to test different scenarios:</p>
-        
+
         <div class="test-grid">
-            <button class="button" onclick="testBasicEscape()">
+            <button type="button" class="button" onclick="testBasicEscape()">
                 Show Basic Escape Modal
             </button>
-            
-            <button class="button" onclick="testCustomEscape()">
+
+            <button type="button" class="button" onclick="testCustomEscape()">
                 Show Custom Escape Modal
             </button>
-            
-            <button class="button" onclick="testAutoRedirect()">
+
+            <button type="button" class="button" onclick="testAutoRedirect()">
                 Test Auto Redirect
             </button>
-            
-            <button class="button secondary" onclick="testForceEscape()">
+
+            <button type="button" class="button secondary" onclick="testForceEscape()">
                 🚀 Test Enhanced Force Escape
             </button>
-            
-            <button class="button" onclick="testCopyUrl()">
+
+            <button type="button" class="button" onclick="testCopyUrl()">
                 Copy URL to Clipboard
             </button>
         </div>
-    </div>
-        
     </div>
 
     <div class="demo-section">
         <h2>📱 Simulate Different In-App Browsers</h2>
         <p>Test the library with different simulated in-app browsers:</p>
-        
+
         <div class="test-grid">
-            <button class="button" onclick="simulateInstagram()">
+            <button type="button" class="button" onclick="simulateInstagram()">
                 📷 Instagram Browser
             </button>
-            
-            <button class="button" onclick="simulateFacebook()">
+
+            <button type="button" class="button" onclick="simulateFacebook()">
                 👥 Facebook Browser
             </button>
-            
-            <button class="button" onclick="simulateTwitter()">
+
+            <button type="button" class="button" onclick="simulateTwitter()">
                 🐦 Twitter/X Browser
             </button>
-            
-            <button class="button" onclick="resetUserAgent()">
+
+            <button type="button" class="button" onclick="resetUserAgent()">
                 🔄 Reset to Normal Browser
             </button>
         </div>
@@ -145,7 +155,7 @@
     <div class="demo-section">
         <h2>📊 Live Detection Results</h2>
         <div id="detection-results"></div>
-        <div id="test-results" style="margin-top: 15px;"></div>
+        <div id="test-results"></div>
     </div>
 
     <div class="demo-section">
@@ -163,7 +173,7 @@
 
     <div class="demo-section">
         <h2>💻 Code Examples</h2>
-        
+
         <h3>Basic Usage:</h3>
         <pre><code>import InAppBrowserEscaper, { InAppBrowserDetector } from 'inappbrowserescaper';
 
@@ -205,7 +215,7 @@ InAppBrowserEscaper.escape({
 
     <!-- Include the built library -->
     <script src="./dist/browser/inappbrowserescaper.js"></script>
-    
+
     <script>
         // Initialize demo
         let originalUserAgent = navigator.userAgent;
@@ -227,9 +237,9 @@ InAppBrowserEscaper.escape({
             // Add simulate button if not in an in-app browser
             if (!info.isInApp) {
                 statusHtml += `
-                    <div style="margin-top: 15px;">
-                        <p style="margin-bottom: 10px;"><strong>💡 Tip:</strong> Simulate an in-app browser first for a better demo experience!</p>
-                        <button class="button secondary" onclick="simulateInstagram()" style="margin: 0;">
+                    <div class="simulation-tip">
+                        <p><strong>💡 Tip:</strong> Simulate an in-app browser first for a better demo experience!</p>
+                        <button type="button" class="button secondary" onclick="simulateInstagram()">
                             📱 Simulate In-App Browser
                         </button>
                     </div>
