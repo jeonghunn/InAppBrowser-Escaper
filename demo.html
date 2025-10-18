@@ -186,6 +186,21 @@ if (InAppBrowserDetector.isInAppBrowser()) {
 if (browserInfo.appName === 'instagram') {
   InAppBrowserEscaper.escape({ autoRedirect: true });
 }</code></pre>
+
+        <h3>Using fallbackUrl:</h3>
+        <pre><code>// Redirect to a specific URL instead of current page
+InAppBrowserEscaper.escape({
+  fallbackUrl: 'https://jhrun.com',
+  showModal: true,
+  buttonText: 'Continue to Site'
+});
+
+// Useful for redirecting to app stores or landing pages
+InAppBrowserEscaper.escape({
+  fallbackUrl: 'https://apps.apple.com/app/your-app',
+  message: 'Get the best experience with our mobile app!',
+  autoRedirect: true
+});</code></pre>
     </div>
 
     <!-- Include the built library -->
