@@ -39,8 +39,8 @@ jobs:
 
       - name: Validate HTML files
         run: |
-          html-validate demo.html --config '{"extends": ["html-validate:recommended"], "rules": {"no-trailing-whitespace": "off"}}'
-          html-validate debug-*.html --config '{"extends": ["html-validate:recommended"], "rules": {"no-trailing-whitespace": "off"}}'
+          html-validate demo.html
+          html-validate debug-*.html
 
       - name: Check TypeScript examples
         run: |
