@@ -132,12 +132,8 @@
                 👥 Facebook Browser
             </button>
             
-            <button class="button" onclick="simulateTikTok()">
-                🎵 TikTok Browser
-            </button>
-            
             <button class="button" onclick="simulateTwitter()">
-                🐦 Twitter Browser
+                🐦 Twitter/X Browser
             </button>
             
             <button class="button" onclick="resetUserAgent()">
@@ -157,9 +153,8 @@
         <div class="warning">
             <strong>For comprehensive testing:</strong>
             <ol>
-                <li><strong>iOS Testing:</strong> Share this page to Instagram, Facebook, or TikTok on iPhone/iPad</li>
+                <li><strong>iOS Testing:</strong> Share this page to Instagram and Facebook on iPhone/iPad</li>
                 <li><strong>Android Testing:</strong> Open the shared link within social media apps</li>
-                <li><strong>Safari Schemes:</strong> Test the orange "Safari URL Scheme" buttons on iOS</li>
                 <li><strong>Enhanced Escape:</strong> Try the "🚀 Enhanced Force Escape" button</li>
                 <li><strong>Monitor Results:</strong> Check console logs for detailed strategy information</li>
             </ol>
@@ -287,7 +282,7 @@ if (browserInfo.appName === 'instagram') {
         }
         
         function testForceEscape() {
-            addTestResult('🚀 Testing enhanced force escape with all Safari schemes...');
+            addTestResult('🚀 Testing force escape with all Safari schemes...');
             InAppBrowserEscaper.forceEscape('https://www.example.com');
             addTestResult('Force escape completed - check console for strategy details');
         }
