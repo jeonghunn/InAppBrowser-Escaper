@@ -217,7 +217,7 @@ describe('InAppBrowserEscaper', () => {
       expect(result).toBe(false);
     });
 
-    it('should show modal when in in-app browser', () => {
+    it('should auto-redirect when in in-app browser with default options', () => {
       Object.defineProperty(window.navigator, 'userAgent', {
         value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 Instagram',
         writable: true,
@@ -226,21 +226,69 @@ describe('InAppBrowserEscaper', () => {
       const result = InAppBrowserEscaper.escape();
       expect(result).toBe(true);
       
+      // With autoRedirect: true (default), modal should not be shown
       const modal = document.querySelector('[style*="z-index: 999999"]');
-      expect(modal).toBeTruthy();
+      expect(modal).toBeFalsy();
     });
 
-    it('should not show modal when showModal is false', () => {
+    it('should show modal when showModal is true and autoRedirect is false', () => {
       Object.defineProperty(window.navigator, 'userAgent', {
         value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 Instagram',
         writable: true,
       });
 
-      const result = InAppBrowserEscaper.escape({ showModal: false });
+      const result = InAppBrowserEscaper.escape({ showModal: true, autoRedirect: false });
+      expect(result).toBe(true);
+      
+      const modal = document.querySelector('[style*="z-index: 999999"]');
+      expect(modal).toBeTruthy();
+    });
+
+    it('should not show modal or redirect when both showModal and autoRedirect are false', () => {
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 Instagram',
+        writable: true,
+      });
+
+      const result = InAppBrowserEscaper.escape({ showModal: false, autoRedirect: false });
       expect(result).toBe(false);
       
       const modal = document.querySelector('[style*="z-index: 999999"]');
       expect(modal).toBeFalsy();
+    });
+
+    it('should use custom message and buttonText when provided', () => {
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 Instagram',
+        writable: true,
+      });
+
+      const customMessage = 'Custom message for better experience';
+      const customButtonText = 'Open Now';
+      
+      InAppBrowserEscaper.escape({ 
+        showModal: true,
+        autoRedirect: false,
+        message: customMessage,
+        buttonText: customButtonText
+      });
+      
+      const modal = document.querySelector('[style*="z-index: 999999"]');
+      expect(modal?.innerHTML).toContain(customMessage);
+      expect(modal?.innerHTML).toContain(customButtonText);
+    });
+
+    it('should auto-redirect with custom fallbackUrl when provided', () => {
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 Instagram',
+        writable: true,
+      });
+
+      const customUrl = 'https://example.com/custom-page';
+      const result = InAppBrowserEscaper.escape({ fallbackUrl: customUrl });
+      
+      expect(result).toBe(true);
+      // The redirect would be performed with the custom URL
     });
   });
 
