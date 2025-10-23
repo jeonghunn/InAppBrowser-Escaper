@@ -290,6 +290,52 @@ describe('InAppBrowserEscaper', () => {
       expect(result).toBe(true);
       // The redirect would be performed with the custom URL
     });
+
+    it('should work with force option even when not in in-app browser', () => {
+      // Regular browser - should normally return false
+      expect(InAppBrowserDetector.isInAppBrowser()).toBe(false);
+      
+      // But with force: true, it should still attempt to redirect
+      const result = InAppBrowserEscaper.escape({ force: true });
+      expect(result).toBe(true);
+      
+      // Should show quick instructions overlay
+      const overlay = document.querySelector('[style*="z-index: 999999"]');
+      expect(overlay).toBeTruthy();
+    });
+
+    it('should use force mode with fallbackUrl', () => {
+      const customUrl = 'https://example.com/custom-page';
+      const result = InAppBrowserEscaper.escape({ 
+        force: true, 
+        fallbackUrl: customUrl 
+      });
+      
+      expect(result).toBe(true);
+      
+      // Should show quick instructions overlay
+      const overlay = document.querySelector('[style*="z-index: 999999"]');
+      expect(overlay).toBeTruthy();
+    });
+
+    it('should prioritize force mode over autoRedirect and showModal', () => {
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 Instagram',
+        writable: true,
+      });
+
+      const result = InAppBrowserEscaper.escape({ 
+        force: true,
+        autoRedirect: false,
+        showModal: false
+      });
+      
+      expect(result).toBe(true);
+      
+      // Should show quick instructions overlay (force mode)
+      const overlay = document.querySelector('[style*="z-index: 999999"]');
+      expect(overlay).toBeTruthy();
+    });
   });
 
   describe('copyUrlToClipboard', () => {

@@ -308,7 +308,7 @@ InAppBrowserEscaper.escape({
         
         function testForceEscape() {
             addTestResult('🚀 Testing force escape with all Safari schemes...');
-            InAppBrowserEscaper.forceEscape('https://jhrun.com');
+            InAppBrowserEscaper.escape({ force: true, fallbackUrl: 'https://jhrun.com' });
             addTestResult('Force escape completed - check console for strategy details');
         }
         

@@ -19,6 +19,7 @@ export interface EscapeOptions {
   showModal?: boolean;
   autoRedirect?: boolean;
   fallbackUrl?: string;
+  force?: boolean;
 }
 
 /**
@@ -159,12 +160,20 @@ export class InAppBrowserEscaper {
   static escape(options: EscapeOptions = {}): boolean {
     const browserInfo = InAppBrowserDetector.analyze();
     
-    if (!browserInfo.isInApp) {
+    if (!browserInfo.isInApp && !options.force) {
       return false; // Already in a regular browser
     }
 
     const config = { ...this.defaultOptions, ...options };
     const currentUrl = config.fallbackUrl || window.location.href;
+
+    // Force mode: try immediate redirect with quick instructions
+    if (config.force) {
+      this.performRedirect(currentUrl, browserInfo);
+      this.copyUrlToClipboard(currentUrl);
+      this.showQuickInstructions(currentUrl, browserInfo);
+      return true;
+    }
 
     if (config.autoRedirect) {
       this.performRedirect(currentUrl, browserInfo);
@@ -501,22 +510,7 @@ export class InAppBrowserEscaper {
     }
   }
 
-  /**
-   * Enhanced escape method that tries multiple strategies
-   */
-  static forceEscape(url?: string): void {
-    const targetUrl = url || window.location.href;
-    const browserInfo = InAppBrowserDetector.analyze();
-    
-    // Try immediate redirect
-    this.performRedirect(targetUrl, browserInfo);
-    
-    // Also copy URL to clipboard as backup
-    this.copyUrlToClipboard(targetUrl);
-    
-    // Show instructions overlay
-    this.showQuickInstructions(targetUrl, browserInfo);
-  }
+
 
   /**
    * Shows quick instructions overlay
