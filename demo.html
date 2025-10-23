@@ -277,7 +277,7 @@ InAppBrowserEscaper.escape({
         }
         
         function testBasicEscape() {
-            const url = 'https://www.google.com';
+            const url = 'https://jhrun.com';
             addTestResult(`🧪 Testing basic escape with URL: ${url}`);
             InAppBrowserEscaper.escape({
                 fallbackUrl: url
@@ -289,7 +289,7 @@ InAppBrowserEscaper.escape({
                 message: '🛍️ For secure checkout and the best shopping experience, please open this in your browser',
                 buttonText: '🔒 Shop Securely',
                 showModal: true,
-                fallbackUrl: 'https://www.example.com'
+                fallbackUrl: 'https://jhrun.com'
             });
         }
         
@@ -298,7 +298,7 @@ InAppBrowserEscaper.escape({
                 InAppBrowserEscaper.escape({
                     autoRedirect: true,
                     showModal: false,
-                    fallbackUrl: 'https://www.google.com'
+                    fallbackUrl: 'https://jhrun.com'
                 });
                 addTestResult('Auto-redirect attempted with enhanced strategies');
             } else {
@@ -308,12 +308,12 @@ InAppBrowserEscaper.escape({
         
         function testForceEscape() {
             addTestResult('🚀 Testing force escape with all Safari schemes...');
-            InAppBrowserEscaper.forceEscape('https://www.example.com');
+            InAppBrowserEscaper.forceEscape('https://jhrun.com');
             addTestResult('Force escape completed - check console for strategy details');
         }
         
         function testSafariHttpsScheme() {
-            const url = 'https://www.google.com';
+            const url = 'https://jhrun.com';
             const schemeUrl = url.replace(/^https:\/\//, 'x-safari-https://');
             addTestResult(`Testing: ${schemeUrl}`);
             setTimeout(() => {
@@ -322,7 +322,7 @@ InAppBrowserEscaper.escape({
         }
         
         function testSafariHttpScheme() {
-            const url = 'http://example.com';
+            const url = 'http://jhrun.com';
             const schemeUrl = url.replace(/^http:\/\//, 'x-safari-http://');
             addTestResult(`Testing: ${schemeUrl}`);
             setTimeout(() => {
@@ -447,8 +447,8 @@ InAppBrowserEscaper.escape({
                 setTimeout(() => {
                     InAppBrowserEscaper.escape({
                         message: '🎉 Welcome to the InAppBrowserEscaper demo! You\'re currently in an in-app browser. This modal demonstrates the enhanced escape functionality with multiple Safari URL schemes.',
-                        fallbackUrl: 'https://www.google.com'
                         buttonText: '🚀 Open in Browser',
+                        fallbackUrl: 'https://jhrun.com'
                     });
                     addTestResult('🎉 Auto-showed escape modal for in-app browser');
                 }, 1500);
