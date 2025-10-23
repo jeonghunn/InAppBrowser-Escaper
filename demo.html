@@ -120,7 +120,7 @@
             </button>
 
             <button type="button" class="button secondary" onclick="testForceEscape()">
-                🚀 Test Enhanced Force Escape
+                🚀 Test Force Escape
             </button>
 
             <button type="button" class="button" onclick="testCopyUrl()">
@@ -165,7 +165,7 @@
             <ol>
                 <li><strong>iOS Testing:</strong> Share this page to Instagram and Facebook on iPhone/iPad</li>
                 <li><strong>Android Testing:</strong> Open the shared link within social media apps</li>
-                <li><strong>Enhanced Escape:</strong> Try the "🚀 Enhanced Force Escape" button</li>
+                <li><strong>Force Escape:</strong> Try the "🚀 Force Escape" button</li>
                 <li><strong>Monitor Results:</strong> Check console logs for detailed strategy information</li>
             </ol>
         </div>
@@ -447,10 +447,10 @@ InAppBrowserEscaper.escape({
                 setTimeout(() => {
                     InAppBrowserEscaper.escape({
                         message: '🎉 Welcome to the InAppBrowserEscaper demo! You\'re currently in an in-app browser. This modal demonstrates the enhanced escape functionality with multiple Safari URL schemes.',
-                        buttonText: '🚀 Open in Browser (Enhanced)',
                         fallbackUrl: 'https://www.google.com'
+                        buttonText: '🚀 Open in Browser',
                     });
-                    addTestResult('🎉 Auto-showed enhanced escape modal for in-app browser');
+                    addTestResult('🎉 Auto-showed escape modal for in-app browser');
                 }, 1500);
             }
         });
