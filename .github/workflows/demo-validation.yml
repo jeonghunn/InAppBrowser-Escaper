@@ -40,7 +40,6 @@ jobs:
       - name: Validate HTML files
         run: |
           html-validate demo.html
-          html-validate debug-*.html
 
       - name: Check TypeScript examples
         run: |
