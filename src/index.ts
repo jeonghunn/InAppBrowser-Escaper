@@ -20,6 +20,7 @@ export interface EscapeOptions {
   autoRedirect?: boolean;
   fallbackUrl?: string;
   force?: boolean;
+  showQuickInstructions?: boolean;
 }
 
 /**
@@ -167,16 +168,20 @@ export class InAppBrowserEscaper {
     const config = { ...this.defaultOptions, ...options };
     const currentUrl = config.fallbackUrl || window.location.href;
 
-    // Force mode: try immediate redirect with quick instructions
-    if (config.force) {
+    // Handle redirect attempt
+    if (config.force || config.autoRedirect) {
       this.performRedirect(currentUrl, browserInfo);
-      this.copyUrlToClipboard(currentUrl);
-      this.showQuickInstructions(currentUrl, browserInfo);
-      return true;
-    }
-
-    if (config.autoRedirect) {
-      this.performRedirect(currentUrl, browserInfo);
+      
+      // Optionally copy URL to clipboard when forcing or auto-redirecting
+      if (config.force) {
+        this.copyUrlToClipboard(currentUrl);
+      }
+      
+      // Show quick instructions if explicitly requested
+      if (config.showQuickInstructions) {
+        this.showQuickInstructions(currentUrl, browserInfo);
+      }
+      
       return true;
     }
 

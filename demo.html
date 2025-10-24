@@ -307,8 +307,12 @@ InAppBrowserEscaper.escape({
         }
         
         function testForceEscape() {
-            addTestResult('🚀 Testing force escape with all Safari schemes...');
-            InAppBrowserEscaper.escape({ force: true, fallbackUrl: 'https://jhrun.com' });
+            addTestResult('🚀 Testing force escape with quick instructions...');
+            InAppBrowserEscaper.escape({ 
+                force: true, 
+                showQuickInstructions: true,
+                fallbackUrl: 'https://jhrun.com' 
+            });
             addTestResult('Force escape completed - check console for strategy details');
         }
         

@@ -184,7 +184,8 @@ Attempts to help the user escape from the in-app browser.
 - `showModal?: boolean` - Whether to show the escape modal (default: true)
 - `autoRedirect?: boolean` - Attempt automatic redirect (default: false)
 - `fallbackUrl?: string` - Custom URL to redirect to (default: current URL)
-- `force?: boolean` - Force escape attempt even when not in an in-app browser, tries all redirect strategies and shows quick instructions (default: false)
+- `force?: boolean` - Force redirect attempt even when not in an in-app browser and copy URL to clipboard (default: false)
+- `showQuickInstructions?: boolean` - Show quick instructions overlay with platform-specific guidance (default: false)
 
 #### `copyUrlToClipboard(url?: string): Promise<boolean>`
 Copies the current or specified URL to the clipboard.

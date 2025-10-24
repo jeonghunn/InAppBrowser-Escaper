@@ -299,9 +299,9 @@ describe('InAppBrowserEscaper', () => {
       const result = InAppBrowserEscaper.escape({ force: true });
       expect(result).toBe(true);
       
-      // Should show quick instructions overlay
+      // Should NOT show quick instructions overlay by default
       const overlay = document.querySelector('[style*="z-index: 999999"]');
-      expect(overlay).toBeTruthy();
+      expect(overlay).toBeFalsy();
     });
 
     it('should use force mode with fallbackUrl', () => {
@@ -313,12 +313,47 @@ describe('InAppBrowserEscaper', () => {
       
       expect(result).toBe(true);
       
+      // Should NOT show quick instructions overlay by default
+      const overlay = document.querySelector('[style*="z-index: 999999"]');
+      expect(overlay).toBeFalsy();
+    });
+
+    it('should show quick instructions when explicitly requested', () => {
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 Instagram',
+        writable: true,
+      });
+
+      const result = InAppBrowserEscaper.escape({ 
+        autoRedirect: true,
+        showQuickInstructions: true
+      });
+      
+      expect(result).toBe(true);
+      
       // Should show quick instructions overlay
       const overlay = document.querySelector('[style*="z-index: 999999"]');
       expect(overlay).toBeTruthy();
     });
 
-    it('should prioritize force mode over autoRedirect and showModal', () => {
+    it('should combine force with showQuickInstructions', () => {
+      // Regular browser
+      expect(InAppBrowserDetector.isInAppBrowser()).toBe(false);
+      
+      const result = InAppBrowserEscaper.escape({ 
+        force: true,
+        showQuickInstructions: true,
+        fallbackUrl: 'https://example.com'
+      });
+      
+      expect(result).toBe(true);
+      
+      // Should show quick instructions overlay
+      const overlay = document.querySelector('[style*="z-index: 999999"]');
+      expect(overlay).toBeTruthy();
+    });
+
+    it('should prioritize force mode over showModal', () => {
       Object.defineProperty(window.navigator, 'userAgent', {
         value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 Instagram',
         writable: true,
@@ -326,15 +361,14 @@ describe('InAppBrowserEscaper', () => {
 
       const result = InAppBrowserEscaper.escape({ 
         force: true,
-        autoRedirect: false,
-        showModal: false
+        showModal: true // This should be ignored
       });
       
       expect(result).toBe(true);
       
-      // Should show quick instructions overlay (force mode)
+      // Should NOT show modal or instructions (force without showQuickInstructions)
       const overlay = document.querySelector('[style*="z-index: 999999"]');
-      expect(overlay).toBeTruthy();
+      expect(overlay).toBeFalsy();
     });
   });
 
