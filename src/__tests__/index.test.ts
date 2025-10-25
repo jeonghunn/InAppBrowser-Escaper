@@ -166,6 +166,50 @@ describe('InAppBrowserDetector', () => {
       expect(result.isInApp).toBe(false);
       expect(result.appName).toBeUndefined();
     });
+
+    it('should detect iOS Safari in-app browser (SFSafariViewController)', () => {
+      // Mock iOS Safari user agent
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1',
+        writable: true,
+      });
+
+      // Mock window.safari and window.webkit to simulate SFSafariViewController
+      // SFSafariViewController has webkit but not safari object
+      const windowAny = window as any;
+      delete windowAny.safari; // Remove safari object (not present in SFSafariViewController)
+      windowAny.webkit = {}; // Add webkit object (present in SFSafariViewController)
+
+      const result = InAppBrowserDetector.analyze();
+      expect(result.isInApp).toBe(true);
+      expect(result.platform).toBe('ios');
+      expect(result.appName).toBe('ios_safari_in_app');
+
+      // Clean up
+      delete windowAny.webkit;
+    });
+
+    it('should NOT detect regular Safari as in-app browser', () => {
+      // Mock iOS Safari user agent
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1',
+        writable: true,
+      });
+
+      // Mock window.safari and window.webkit to simulate regular Safari
+      // Regular Safari has both safari and webkit objects
+      const windowAny = window as any;
+      windowAny.safari = {}; // Safari object is present in regular Safari
+      windowAny.webkit = {}; // webkit is also present
+
+      const result = InAppBrowserDetector.analyze();
+      expect(result.isInApp).toBe(false);
+      expect(result.appName).toBeUndefined();
+
+      // Clean up
+      delete windowAny.safari;
+      delete windowAny.webkit;
+    });
   });
 
   describe('isInAppBrowser', () => {

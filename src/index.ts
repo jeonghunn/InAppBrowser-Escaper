@@ -62,6 +62,16 @@ export class InAppBrowserDetector {
       }
     }
     
+    // Check for iOS Safari in-app browser (SFSafariViewController)
+    if (this.isIOSSafariInApp(userAgent)) {
+      return {
+        isInApp: true,
+        platform: this.getPlatform(),
+        userAgent,
+        appName: 'ios_safari_in_app',
+      };
+    }
+    
     // Check for Android WebView as fallback (catches generic in-app browsers)
     if (this.isAndroidWebView(userAgent)) {
       return {
@@ -77,6 +87,33 @@ export class InAppBrowserDetector {
       platform: this.getPlatform(),
       userAgent,
     };
+  }
+
+  /**
+   * Detects iOS Safari in-app browser (SFSafariViewController)
+   */
+  private static isIOSSafariInApp(userAgent: string): boolean {
+    // Must be iOS
+    if (!/iPhone|iPad|iPod/.test(userAgent)) return false;
+    
+    // Must be Safari (not other browsers like Chrome, Firefox, etc.)
+    if (!(/Safari/.test(userAgent) && !/CriOS|FxiOS|OPiOS|EdgiOS/.test(userAgent))) {
+      return false;
+    }
+    
+    // Exclude if it's clearly identified as another browser
+    if (/Chrome|Firefox|Opera|Edge/.test(userAgent)) {
+      return false;
+    }
+    
+    // Additional check: SFSafariViewController doesn't support some APIs
+    // Check if we're in a restricted context
+    if (typeof (window as any).safari === 'undefined' && 
+        typeof (window as any).webkit !== 'undefined') {
+      return true;
+    }
+    
+    return false;
   }
 
   /**
