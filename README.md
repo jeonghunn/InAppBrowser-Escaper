@@ -21,11 +21,12 @@ A lightweight TypeScript library that helps users escape from in-app browsers (I
 - Instagram (iOS ✅, Android ✅)
 - Facebook (iOS ✅, Android )
 - Facebook Messanger (iOS ❌, Android ✅)
-- Telegram (iOS ✅, Android ❌)
+- Telegram (iOS ✅, Android ✅)
 - Snapchat (iOS ❌, Android ❌)
 - LinkedIn (iOS ✅, Android ❌)
 - Line (iOS ✅, Android ✅)
 - KakaoTalk (iOS ✅, Android ✅)
+- Safari In App - SFSafariViewController (iPhone ✅, iPad ❌) 
 - Chrome Custom Tab (Android ❌)
 
 ## 📦 Installation
