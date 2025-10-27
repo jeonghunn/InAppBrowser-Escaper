@@ -187,14 +187,14 @@ if (InAppBrowserDetector.isInAppBrowser()) {
         <pre><code>InAppBrowserEscaper.escape({
   message: 'For the best experience, please open this in your browser',
   buttonText: 'Open in Browser',
-  showModal: true,
-  autoRedirect: false
+  showModal: true
 });</code></pre>
 
-        <h3>Auto-redirect for specific apps:</h3>
+        <h3>Auto-redirect (default behavior):</h3>
         <pre><code>const browserInfo = InAppBrowserDetector.analyze();
 if (browserInfo.appName === 'instagram') {
-  InAppBrowserEscaper.escape({ autoRedirect: true });
+  // Calling escape() without showModal will auto-redirect
+  InAppBrowserEscaper.escape();
 }</code></pre>
 
         <h3>Using fallbackUrl:</h3>
@@ -205,11 +205,11 @@ InAppBrowserEscaper.escape({
   buttonText: 'Continue to Site'
 });
 
-// Useful for redirecting to app stores or landing pages
+// Auto-redirect to app store or landing page
 InAppBrowserEscaper.escape({
   fallbackUrl: 'https://apps.apple.com/app/your-app',
-  message: 'Get the best experience with our mobile app!',
-  autoRedirect: true
+  message: 'Get the best experience with our mobile app!'
+  // showModal: false is default, so it will auto-redirect
 });</code></pre>
     </div>
 
@@ -280,7 +280,8 @@ InAppBrowserEscaper.escape({
             const url = 'https://jhrun.com';
             addTestResult(`🧪 Testing basic escape with URL: ${url}`);
             InAppBrowserEscaper.escape({
-                fallbackUrl: url
+                fallbackUrl: url,
+                showModal: true,
             });
         }
         
@@ -296,8 +297,6 @@ InAppBrowserEscaper.escape({
         function testAutoRedirect() {
             if (InAppBrowserDetector.isInAppBrowser()) {
                 InAppBrowserEscaper.escape({
-                    autoRedirect: true,
-                    showModal: false,
                     fallbackUrl: 'https://jhrun.com'
                 });
                 addTestResult('Auto-redirect attempted with enhanced strategies');
@@ -452,7 +451,8 @@ InAppBrowserEscaper.escape({
                     InAppBrowserEscaper.escape({
                         message: '🎉 Welcome to the InAppBrowserEscaper demo! You\'re currently in an in-app browser. This modal demonstrates the enhanced escape functionality with multiple Safari URL schemes.',
                         buttonText: '🚀 Open in Browser',
-                        fallbackUrl: 'https://jhrun.com'
+                        fallbackUrl: 'https://jhrun.com',
+                        showModal: true
                     });
                     addTestResult('🎉 Auto-showed escape modal for in-app browser');
                 }, 1500);

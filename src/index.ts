@@ -14,12 +14,21 @@ export interface BrowserInfo {
 }
 
 export interface EscapeOptions {
+  /** Custom message to display in the modal */
   message?: string;
+  /** Text for the action button */
   buttonText?: string;
+  /** 
+   * Show a modal for user interaction (default: false)
+   * - When true: Shows modal with instructions and action button
+   * - When false: Automatically attempts to redirect to external browser
+   */
   showModal?: boolean;
-  autoRedirect?: boolean;
+  /** URL to redirect to (defaults to current URL) */
   fallbackUrl?: string;
+  /** Force escape attempt even if not in an in-app browser */
   force?: boolean;
+  /** Show quick visual instructions overlay */
   showQuickInstructions?: boolean;
 }
 
@@ -188,12 +197,16 @@ export class InAppBrowserEscaper {
   private static defaultOptions: EscapeOptions = {
     message: 'For the best experience, please open this in your browser',
     buttonText: '🚀 Open in Browser',
-    showModal: false,
-    autoRedirect: true,
+    showModal: false, // Default: auto-redirect when escape() is called
   };
 
   /**
    * Attempts to escape from the in-app browser
+   * 
+   * Behavior:
+   * - showModal: false (default) → Auto-redirects to external browser
+   * - showModal: true → Shows modal with instructions and action button
+   * - force: true → Always auto-redirects, even if showModal is true
    */
   static escape(options: EscapeOptions = {}): boolean {
     const browserInfo = InAppBrowserDetector.analyze();
@@ -205,16 +218,11 @@ export class InAppBrowserEscaper {
     const config = { ...this.defaultOptions, ...options };
     const currentUrl = config.fallbackUrl || window.location.href;
 
-    // Handle redirect attempt
-    if (config.force || config.autoRedirect) {
+    // Force mode takes priority - always auto-redirect
+    if (config.force) {
       this.performRedirect(currentUrl, browserInfo);
+      this.copyUrlToClipboard(currentUrl);
       
-      // Optionally copy URL to clipboard when forcing or auto-redirecting
-      if (config.force) {
-        this.copyUrlToClipboard(currentUrl);
-      }
-      
-      // Show quick instructions if explicitly requested
       if (config.showQuickInstructions) {
         this.showQuickInstructions(currentUrl, browserInfo);
       }
@@ -222,12 +230,21 @@ export class InAppBrowserEscaper {
       return true;
     }
 
+    // Show modal if explicitly requested
     if (config.showModal) {
       this.showEscapeModal(currentUrl, config, browserInfo);
       return true;
     }
 
-    return false;
+    // Otherwise, auto-redirect (default behavior)
+    this.performRedirect(currentUrl, browserInfo);
+    
+    // Show quick instructions if explicitly requested
+    if (config.showQuickInstructions) {
+      this.showQuickInstructions(currentUrl, browserInfo);
+    }
+    
+    return true;
   }
 
   /**
