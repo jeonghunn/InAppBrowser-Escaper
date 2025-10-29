@@ -1,5 +1,5 @@
 {
-  "name": "inappbrowserescaper",
+  "name": "@jhrunning/inappbrowserescaper",
   "version": "0.0.3",
   "description": "A TypeScript library to help users escape from in-app browsers like Instagram, Facebook, Telegram, etc.",
   "type": "commonjs",
@@ -57,12 +57,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/inappbrowserescaper.git"
+    "url": "git+https://github.com/jeonghunn/InAppBrowser-Escaper.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/inappbrowserescaper/issues"
+    "url": "https://github.com/jeonghunn/InAppBrowser-Escaper/issues"
   },
-  "homepage": "https://github.com/yourusername/inappbrowserescaper#readme",
+  "homepage": "https://github.com/jeonghunn/InAppBrowser-Escaper#readme",
   "peerDependencies": {
     "@angular/common": ">=12.0.0",
     "@angular/core": ">=12.0.0",
