@@ -62,6 +62,9 @@
             border-radius: 8px;
             margin: 10px 0;
         }
+        #test-results {
+            margin-top: 15px;
+        }
         .warning {
             background: #fff3e0;
             padding: 15px;
@@ -74,6 +77,15 @@
             border-radius: 8px;
             margin: 10px 0;
         }
+        .simulation-tip {
+            margin-top: 15px;
+        }
+        .simulation-tip p {
+            margin-bottom: 10px;
+        }
+        .simulation-tip button {
+            margin: 0;
+        }
         pre {
             background: #f8f8f8;
             padding: 10px;
@@ -84,7 +96,7 @@
 </head>
 <body>
     <h1>🌐 InAppBrowserEscaper Demo</h1>
-    
+
     <div class="info">
         <h3>Current Browser Status</h3>
         <p id="browser-info">Loading...</p>
@@ -93,70 +105,57 @@
     <div class="demo-section">
         <h2>🔧 Test Controls</h2>
         <p>Use these buttons to test different scenarios:</p>
-        
+
         <div class="test-grid">
-            <button class="button" onclick="testBasicEscape()">
+            <button type="button" class="button" onclick="testBasicEscape()">
                 Show Basic Escape Modal
             </button>
-            
-            <button class="button" onclick="testCustomEscape()">
+
+            <button type="button" class="button" onclick="testCustomEscape()">
                 Show Custom Escape Modal
             </button>
-            
-            <button class="button" onclick="testAutoRedirect()">
+
+            <button type="button" class="button" onclick="testAutoRedirect()">
                 Test Auto Redirect
             </button>
-            
-            <button class="button secondary" onclick="testForceEscape()">
-                🚀 Test Enhanced Force Escape
+
+            <button type="button" class="button secondary" onclick="testForceEscape()">
+                🚀 Test Force Escape
             </button>
-            
-            <button class="button" onclick="testCopyUrl()">
+
+            <button type="button" class="button" onclick="testCopyUrl()">
                 Copy URL to Clipboard
             </button>
         </div>
-    </div>
-        
-        <button class="button" onclick="simulateInstagram()">
-            Simulate Instagram Browser
-        </button>
-        
-        <button class="button" onclick="resetUserAgent()">
-            Reset to Normal Browser
-        </button>
     </div>
 
     <div class="demo-section">
         <h2>📱 Simulate Different In-App Browsers</h2>
         <p>Test the library with different simulated in-app browsers:</p>
-        
+
         <div class="test-grid">
-            <button class="button" onclick="simulateInstagram()">
+            <button type="button" class="button" onclick="simulateInstagram()">
                 📷 Instagram Browser
             </button>
-            
-            <button class="button" onclick="simulateFacebook()">
+
+            <button type="button" class="button" onclick="simulateFacebook()">
                 👥 Facebook Browser
             </button>
-            
-            <button class="button" onclick="simulateTikTok()">
-                🎵 TikTok Browser
+
+            <button type="button" class="button" onclick="simulateTwitter()">
+                🐦 Twitter/X Browser
             </button>
-            
-            <button class="button" onclick="simulateTwitter()">
-                🐦 Twitter Browser
-            </button>
-            
-            <button class="button" onclick="resetUserAgent()">
+
+            <button type="button" class="button" onclick="resetUserAgent()">
                 🔄 Reset to Normal Browser
             </button>
         </div>
     </div>
 
     <div class="demo-section">
-        <h2>📊 Live Detection Results</h2>
+        <h2>📊 Detection Results</h2>
         <div id="detection-results"></div>
-        <div id="test-results" style="margin-top: 15px;"></div>
+        <div id="test-results"></div>
     </div>
 
     <div class="demo-section">
@@ -164,10 +163,9 @@
         <div class="warning">
             <strong>For comprehensive testing:</strong>
             <ol>
-                <li><strong>iOS Testing:</strong> Share this page to Instagram, Facebook, or TikTok on iPhone/iPad</li>
+                <li><strong>iOS Testing:</strong> Share this page to Instagram and Facebook on iPhone/iPad</li>
                 <li><strong>Android Testing:</strong> Open the shared link within social media apps</li>
-                <li><strong>Safari Schemes:</strong> Test the orange "Safari URL Scheme" buttons on iOS</li>
-                <li><strong>Enhanced Escape:</strong> Try the "🚀 Enhanced Force Escape" button</li>
+                <li><strong>Force Escape:</strong> Try the "🚀 Force Escape" button</li>
                 <li><strong>Monitor Results:</strong> Check console logs for detailed strategy information</li>
             </ol>
         </div>
@@ -175,7 +173,7 @@
 
     <div class="demo-section">
         <h2>💻 Code Examples</h2>
-        
+
         <h3>Basic Usage:</h3>
         <pre><code>import InAppBrowserEscaper, { InAppBrowserDetector } from 'inappbrowserescaper';
 
@@ -189,20 +187,35 @@ if (InAppBrowserDetector.isInAppBrowser()) {
         <pre><code>InAppBrowserEscaper.escape({
   message: 'For the best experience, please open this in your browser',
   buttonText: 'Open in Browser',
-  showModal: true,
-  autoRedirect: false
+  showModal: true
 });</code></pre>
 
-        <h3>Auto-redirect for specific apps:</h3>
+        <h3>Auto-redirect (default behavior):</h3>
         <pre><code>const browserInfo = InAppBrowserDetector.analyze();
 if (browserInfo.appName === 'instagram') {
-  InAppBrowserEscaper.escape({ autoRedirect: true });
+  // Calling escape() without showModal will auto-redirect
+  InAppBrowserEscaper.escape();
 }</code></pre>
+
+        <h3>Using fallbackUrl:</h3>
+        <pre><code>// Redirect to a specific URL instead of current page
+InAppBrowserEscaper.escape({
+  fallbackUrl: 'https://jhrun.com',
+  showModal: true,
+  buttonText: 'Continue to Site'
+});
+
+// Auto-redirect to app store or landing page
+InAppBrowserEscaper.escape({
+  fallbackUrl: 'https://apps.apple.com/app/your-app',
+  message: 'Get the best experience with our mobile app!'
+  // showModal: false is default, so it will auto-redirect
+});</code></pre>
     </div>
 
     <!-- Include the built library -->
     <script src="./dist/browser/inappbrowserescaper.js"></script>
-    
+
     <script>
         // Initialize demo
         let originalUserAgent = navigator.userAgent;
@@ -220,6 +233,18 @@ if (browserInfo.appName === 'instagram') {
                 <strong>App Name:</strong> ${info.appName || 'N/A'}<br>
                 <strong>User Agent:</strong> <code style="font-size: 12px;">${info.userAgent}</code>
             `;
+            
+            // Add simulate button if not in an in-app browser
+            if (!info.isInApp) {
+                statusHtml += `
+                    <div class="simulation-tip">
+                        <p><strong>💡 Tip:</strong> Simulate an in-app browser first for a better demo experience!</p>
+                        <button type="button" class="button secondary" onclick="simulateInstagram()">
+                            📱 Simulate In-App Browser
+                        </button>
+                    </div>
+                `;
+            }
             
             infoElement.innerHTML = statusHtml;
             updateDetectionResults(info);
@@ -252,10 +277,11 @@ if (browserInfo.appName === 'instagram') {
         }
         
         function testBasicEscape() {
-            const url = 'https://www.google.com';
+            const url = 'https://jhrun.com';
             addTestResult(`🧪 Testing basic escape with URL: ${url}`);
             InAppBrowserEscaper.escape({
-                fallbackUrl: url
+                fallbackUrl: url,
+                showModal: true,
             });
         }
         
@@ -264,16 +290,14 @@ if (browserInfo.appName === 'instagram') {
                 message: '🛍️ For secure checkout and the best shopping experience, please open this in your browser',
                 buttonText: '🔒 Shop Securely',
                 showModal: true,
-                fallbackUrl: 'https://www.example.com'
+                fallbackUrl: 'https://jhrun.com'
             });
         }
         
         function testAutoRedirect() {
             if (InAppBrowserDetector.isInAppBrowser()) {
                 InAppBrowserEscaper.escape({
-                    autoRedirect: true,
-                    showModal: false,
-                    fallbackUrl: 'https://www.google.com'
+                    fallbackUrl: 'https://jhrun.com'
                 });
                 addTestResult('Auto-redirect attempted with enhanced strategies');
             } else {
@@ -282,13 +306,17 @@ if (browserInfo.appName === 'instagram') {
         }
         
         function testForceEscape() {
-            addTestResult('🚀 Testing enhanced force escape with all Safari schemes...');
-            InAppBrowserEscaper.forceEscape('https://www.example.com');
+            addTestResult('🚀 Testing force escape with quick instructions...');
+            InAppBrowserEscaper.escape({ 
+                force: true, 
+                showQuickInstructions: true,
+                fallbackUrl: 'https://jhrun.com' 
+            });
             addTestResult('Force escape completed - check console for strategy details');
         }
         
         function testSafariHttpsScheme() {
-            const url = 'https://www.google.com';
+            const url = 'https://jhrun.com';
             const schemeUrl = url.replace(/^https:\/\//, 'x-safari-https://');
             addTestResult(`Testing: ${schemeUrl}`);
             setTimeout(() => {
@@ -297,7 +325,7 @@ if (browserInfo.appName === 'instagram') {
         }
         
         function testSafariHttpScheme() {
-            const url = 'http://example.com';
+            const url = 'http://jhrun.com';
             const schemeUrl = url.replace(/^http:\/\//, 'x-safari-http://');
             addTestResult(`Testing: ${schemeUrl}`);
             setTimeout(() => {
@@ -422,10 +450,11 @@ if (browserInfo.appName === 'instagram') {
                 setTimeout(() => {
                     InAppBrowserEscaper.escape({
                         message: '🎉 Welcome to the InAppBrowserEscaper demo! You\'re currently in an in-app browser. This modal demonstrates the enhanced escape functionality with multiple Safari URL schemes.',
-                        buttonText: '🚀 Open in Browser (Enhanced)',
-                        fallbackUrl: 'https://www.google.com'
+                        buttonText: '🚀 Open in Browser',
+                        fallbackUrl: 'https://jhrun.com',
+                        showModal: true
                     });
-                    addTestResult('🎉 Auto-showed enhanced escape modal for in-app browser');
+                    addTestResult('🎉 Auto-showed escape modal for in-app browser');
                 }, 1500);
             }
         });
