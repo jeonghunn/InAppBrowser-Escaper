@@ -1,10 +1,25 @@
 {
   "name": "inappbrowserescaper",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A TypeScript library to help users escape from in-app browsers like Instagram, Facebook, Telegram, etc.",
+  "type": "commonjs",
   "main": "dist/index.js",
-  "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "default": "./dist/react.js"
+    },
+    "./angular": {
+      "types": "./dist/angular.d.ts",
+      "default": "./dist/angular.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist",
     "scripts",
