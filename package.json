@@ -1,6 +1,6 @@
 {
   "name": "inappbrowserescaper",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A TypeScript library to help users escape from in-app browsers like Instagram, Facebook, Telegram, etc.",
   "type": "commonjs",
   "main": "dist/index.js",
@@ -8,15 +8,13 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./react": {
-      "types": "./dist/react.d.ts",
-      "default": "./dist/react.js"
-    },
-    "./angular": {
-      "types": "./dist/angular.d.ts",
-      "default": "./dist/angular.js"
+      "types": "./dist/react/react.d.ts",
+      "require": "./dist/react/react.js",
+      "default": "./dist/react/react.js"
     },
     "./package.json": "./package.json"
   },
@@ -35,6 +33,8 @@
     "build:browser": "tsc -p tsconfig.browser.json",
     "build:browser-wrapper": "node scripts/build-browser.js",
     "build:react": "tsc -p tsconfig.react.json",
+    "build:angular": "tsc -p tsconfig.angular.json",
+    "build:all": "rimraf dist && npm run build:node && npm run build:browser && npm run build:react && npm run build:angular && npm run build:browser-wrapper",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
