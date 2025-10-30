@@ -1,6 +1,6 @@
 # InAppBrowserEscaper
 
-[![npm version](https://badge.fury.io/js/inappbrowserescaper.svg)](https://www.npmjs.com/package/inappbrowserescaper)
+[![npm version](https://badge.fury.io/js/@jhrunning%2Finappbrowserescaper.svg)](https://www.npmjs.com/package/@jhrunning%2Finappbrowserescaper)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -14,12 +14,12 @@ A lightweight TypeScript library that helps users escape from in-app browsers (I
 - **Mobile Optimized**: Specifically designed for mobile in-app browsers
 - **Customizable UI**: Flexible escape modal with customizable styling
 - **Multiple Strategies**: Auto-redirect, modal display, or manual trigger options
-- **Comprehensive Detection**: Detects 10+ popular in-app browsers
+- **Comprehensive Detection**: Detects popular in-app browsers
 
 ## 📱 Supported In-App Browsers
 
 - Instagram (iOS ✅, Android ✅)
-- Facebook (iOS ✅, Android )
+- Facebook (iOS ✅, Android ✅)
 - Facebook Messanger (iOS ❌, Android ✅)
 - Telegram (iOS ✅, Android ✅)
 - Snapchat (iOS ❌, Android ❌)
@@ -48,7 +48,7 @@ yarn add inappbrowserescaper
 <script src="path/to/inappbrowserescaper/dist/browser/inappbrowserescaper.js"></script>
 
 <!-- Or use a CDN when published -->
-<script src="https://unpkg.com/inappbrowserescaper/dist/browser/inappbrowserescaper.js"></script>
+<script src="https://unpkg.com/@jhrunning%2Finappbrowserescaper/dist/browser/inappbrowserescaper.js"></script>
 ```
 
 ## 🔧 Quick Start
@@ -264,18 +264,6 @@ if (browserInfo.isInApp && browserInfo.appName === 'instagram') {
 - **Desktop Browsers**: Detection works, escape not needed
 - **All Major In-App Browsers**: Comprehensive detection
 
-## 📱 Platform-Specific Behavior
-
-### iOS
-- Uses `window.location.href` for redirects
-- Provides iOS-specific escape instructions
-- Supports Safari deep linking
-
-### Android
-- Uses `window.open()` with fallback to `location.href`
-- Provides Android-specific escape instructions
-- Works with Chrome and other browsers
-
 ## 🔧 Troubleshooting
 
 ### "Can't find variable: exports" Error
@@ -321,14 +309,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Inspired by the need for better user experience in mobile in-app browsers
 - Built with TypeScript for type safety and developer experience
 - Designed to be framework-agnostic for maximum compatibility
-
-## 📊 Usage Statistics
-
-This library helps improve user experience by:
-- Reducing bounce rates from in-app browsers
-- Improving conversion rates for e-commerce sites
-- Providing better functionality access in full browsers
-- Enhancing mobile web app performance
 
 ---
 
