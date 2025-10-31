@@ -3,8 +3,21 @@
 [![npm version](https://badge.fury.io/js/@jhrunning%2Finappbrowserescaper.svg)](https://www.npmjs.com/package/@jhrunning%2Finappbrowserescaper)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+ [![CI/CD](https://github.com/jeonghunn/InAppBrowser-Escaper/actions/workflows/release.yml/badge.svg)](https://github.com/jeonghunn/InAppBrowser-Escaper/actions)
 
 A lightweight TypeScript library that helps users escape from in-app browsers (Instagram, Facebook, Telegram, etc.) to their default browser for a better browsing experience.
+
+## 🎮 Live Demo
+
+<div align="center">
+
+https://github.com/user-attachments/assets/2d32f9a0-cb42-46cb-925b-6b26eeb9ccfa
+
+**[📱 Try the Interactive Demo](https://jhrun.com/develop/inappescaper/demo.html)** - Experience the library in action!
+
+</div>
+
+> 📱 **Tip**: For the best demo experience, open the link from Instagram, Facebook, or any other in-app browser on your mobile device.
 
 ## 🚀 Features
 
