@@ -10,7 +10,7 @@
 /*
 // Example 1: Using the service
 import { Component, OnInit } from '@angular/core';
-import { InAppBrowserEscaperService } from 'inappbrowserescaper/angular';
+import { InAppBrowserEscaperService } from '@jhrunning/inappbrowserescaper/angular';
 
 @Component({
   selector: 'app-my-component',
@@ -102,7 +102,7 @@ export class ContentComponent {}
 
 // Example 4: Module setup
 import { NgModule } from '@angular/core';
-import { InAppBrowserEscaperModule } from 'inappbrowserescaper/angular';
+import { InAppBrowserEscaperModule } from '@jhrunning/inappbrowserescaper/angular';
 
 @NgModule({
   imports: [

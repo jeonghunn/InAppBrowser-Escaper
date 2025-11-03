@@ -47,21 +47,21 @@ https://github.com/user-attachments/assets/56dfa68e-ae6f-4640-ad71-bdfdd5999f78
 ### npm/yarn
 
 ```bash
-npm install inappbrowserescaper
+npm install @jhrunning/inappbrowserescaper
 ```
 
 ```bash
-yarn add inappbrowserescaper
+yarn add @jhrunning/inappbrowserescaper
 ```
 
 ### CDN (Browser)
 
 ```html
 <!-- Include from your own hosting -->
-<script src="path/to/inappbrowserescaper/dist/browser/inappbrowserescaper.js"></script>
+<script src="path/to/@jhrunning/inappbrowserescaper/dist/browser/inappbrowserescaper.js"></script>
 
 <!-- Or use a CDN when published -->
-<script src="https://unpkg.com/@jhrunning%2Finappbrowserescaper/dist/browser/inappbrowserescaper.js"></script>
+<script src="https://unpkg.com/@jhrunning/inappbrowserescaper/dist/browser/inappbrowserescaper.js"></script>
 ```
 
 ## 🔧 Quick Start
@@ -84,7 +84,7 @@ For direct browser usage without a build system:
 ### Module Usage (Node.js/Bundlers)
 
 ```typescript
-import InAppBrowserEscaper, { InAppBrowserDetector } from 'inappbrowserescaper';
+import InAppBrowserEscaper, { InAppBrowserDetector } from '@jhrunning/inappbrowserescaper';
 
 // Check if user is in an in-app browser
 if (InAppBrowserDetector.isInAppBrowser()) {
@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 ```tsx
 import React from 'react';
-import { useInAppBrowserEscaper } from 'inappbrowserescaper/react';
+import { useInAppBrowserEscaper } from '@jhrunning/inappbrowserescaper/react';
 
 function MyComponent() {
   const { isInApp, browserInfo, escapeFromInApp } = useInAppBrowserEscaper();
@@ -138,7 +138,7 @@ function MyComponent() {
 
 ```typescript
 import { Component, OnInit } from '@angular/core';
-import { InAppBrowserEscaperService } from 'inappbrowserescaper/angular';
+import { InAppBrowserEscaperService } from '@jhrunning/inappbrowserescaper/angular';
 
 @Component({
   selector: 'app-my-component',

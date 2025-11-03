@@ -11,7 +11,7 @@
 /*
 // Example 1: Using the hook
 import React from 'react';
-import { useInAppBrowserEscaper } from 'inappbrowserescaper/react';
+import { useInAppBrowserEscaper } from '@jhrunning/inappbrowserescaper/react';
 
 function MyComponent() {
   const { isInApp, browserInfo, escapeFromInApp, copyUrl } = useInAppBrowserEscaper();
@@ -35,7 +35,7 @@ function MyComponent() {
 
 // Example 2: Using the provider
 import React from 'react';
-import { InAppBrowserEscaperProvider } from 'inappbrowserescaper/react';
+import { InAppBrowserEscaperProvider } from '@jhrunning/inappbrowserescaper/react';
 
 function App() {
   return (
@@ -56,7 +56,7 @@ function App() {
 
 // Example 3: Using the escape button component
 import React from 'react';
-import { EscapeButton } from 'inappbrowserescaper/react';
+import { EscapeButton } from '@jhrunning/inappbrowserescaper/react';
 
 function Header() {
   return (

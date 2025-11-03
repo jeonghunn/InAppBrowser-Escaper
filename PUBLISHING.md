@@ -66,7 +66,7 @@ npm publish
 Check that the package was published correctly:
 
 ```bash
-npm view inappbrowserescaper
+npm view @jhrunning/inappbrowserescaper
 ```
 
 ## Post-publish Tasks
@@ -95,7 +95,7 @@ npm publish --tag beta
 
 Users can install beta versions with:
 ```bash
-npm install inappbrowserescaper@beta
+npm install @jhrunning/inappbrowserescaper@beta
 ```
 
 ## Unpublishing (Emergency Only)
@@ -104,15 +104,15 @@ npm install inappbrowserescaper@beta
 
 ```bash
 # Unpublish a specific version
-npm unpublish inappbrowserescaper@1.0.0
+npm unpublish @jhrunning/inappbrowserescaper@1.0.0
 
 # Unpublish entire package (within 72 hours)
-npm unpublish inappbrowserescaper --force
+npm unpublish @jhrunning/inappbrowserescaper --force
 ```
 
 ## Package Information
 
-- **Package name**: `inappbrowserescaper`
+- **Package name**: `@jhrunning/inappbrowserescaper`
 - **Registry**: https://www.npmjs.com/
 - **License**: MIT
 - **Author**: [Update in package.json]
