@@ -429,14 +429,7 @@ export class InAppBrowserEscaper {
         return true;
       };
       
-      const iosSafariHttp = function iosSafariHttp() {
-        // Alternative: x-safari-http scheme
-        const safariUrl = url.replace(/^https?:\/\//, 'x-safari-http://');
-        window.location.href = safariUrl;
-        return true;
-      };
-      
-      strategies.push(iosSafariHttps, iosSafariHttp);
+      strategies.push(iosSafariHttps);
     } else if (browserInfo.platform === 'android') {
       // Android-specific strategies - try Android intents FIRST
       const androidIntent = function androidIntent() {
