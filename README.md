@@ -1,10 +1,23 @@
 # InAppBrowserEscaper
 
-[![npm version](https://badge.fury.io/js/inappbrowserescaper.svg)](https://www.npmjs.com/package/inappbrowserescaper)
+[![npm version](https://badge.fury.io/js/@jhrunning%2Finappbrowserescaper.svg)](https://www.npmjs.com/package/@jhrunning%2Finappbrowserescaper)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+ [![CI/CD](https://github.com/jeonghunn/InAppBrowser-Escaper/actions/workflows/release.yml/badge.svg)](https://github.com/jeonghunn/InAppBrowser-Escaper/actions)
 
 A lightweight TypeScript library that helps users escape from in-app browsers (Instagram, Facebook, Telegram, etc.) to their default browser for a better browsing experience.
+
+## 🎮 Live Demo
+
+<div align="center">
+
+https://github.com/user-attachments/assets/56dfa68e-ae6f-4640-ad71-bdfdd5999f78
+
+**[📱 Try the Interactive Demo](https://jhrun.com/develop/inappescaper/demo.html)** - Experience the library in action!
+
+</div>
+
+> 📱 **Tip**: For the best demo experience, open the link from Instagram, Facebook, or any other in-app browser on your mobile device.
 
 ## 🚀 Features
 
@@ -14,12 +27,12 @@ A lightweight TypeScript library that helps users escape from in-app browsers (I
 - **Mobile Optimized**: Specifically designed for mobile in-app browsers
 - **Customizable UI**: Flexible escape modal with customizable styling
 - **Multiple Strategies**: Auto-redirect, modal display, or manual trigger options
-- **Comprehensive Detection**: Detects 10+ popular in-app browsers
+- **Comprehensive Detection**: Detects popular in-app browsers
 
 ## 📱 Supported In-App Browsers
 
 - Instagram (iOS ✅, Android ✅)
-- Facebook (iOS ✅, Android )
+- Facebook (iOS ✅, Android ✅)
 - Facebook Messanger (iOS ❌, Android ✅)
 - Telegram (iOS ✅, Android ✅)
 - Snapchat (iOS ❌, Android ❌)
@@ -34,21 +47,21 @@ A lightweight TypeScript library that helps users escape from in-app browsers (I
 ### npm/yarn
 
 ```bash
-npm install inappbrowserescaper
+npm install @jhrunning/inappbrowserescaper
 ```
 
 ```bash
-yarn add inappbrowserescaper
+yarn add @jhrunning/inappbrowserescaper
 ```
 
 ### CDN (Browser)
 
 ```html
 <!-- Include from your own hosting -->
-<script src="path/to/inappbrowserescaper/dist/browser/inappbrowserescaper.js"></script>
+<script src="path/to/@jhrunning/inappbrowserescaper/dist/browser/inappbrowserescaper.js"></script>
 
 <!-- Or use a CDN when published -->
-<script src="https://unpkg.com/inappbrowserescaper/dist/browser/inappbrowserescaper.js"></script>
+<script src="https://unpkg.com/@jhrunning/inappbrowserescaper/dist/browser/inappbrowserescaper.js"></script>
 ```
 
 ## 🔧 Quick Start
@@ -71,7 +84,7 @@ For direct browser usage without a build system:
 ### Module Usage (Node.js/Bundlers)
 
 ```typescript
-import InAppBrowserEscaper, { InAppBrowserDetector } from 'inappbrowserescaper';
+import InAppBrowserEscaper, { InAppBrowserDetector } from '@jhrunning/inappbrowserescaper';
 
 // Check if user is in an in-app browser
 if (InAppBrowserDetector.isInAppBrowser()) {
@@ -101,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 ```tsx
 import React from 'react';
-import { useInAppBrowserEscaper } from 'inappbrowserescaper/react';
+import { useInAppBrowserEscaper } from '@jhrunning/inappbrowserescaper/react';
 
 function MyComponent() {
   const { isInApp, browserInfo, escapeFromInApp } = useInAppBrowserEscaper();
@@ -125,7 +138,7 @@ function MyComponent() {
 
 ```typescript
 import { Component, OnInit } from '@angular/core';
-import { InAppBrowserEscaperService } from 'inappbrowserescaper/angular';
+import { InAppBrowserEscaperService } from '@jhrunning/inappbrowserescaper/angular';
 
 @Component({
   selector: 'app-my-component',
@@ -264,18 +277,6 @@ if (browserInfo.isInApp && browserInfo.appName === 'instagram') {
 - **Desktop Browsers**: Detection works, escape not needed
 - **All Major In-App Browsers**: Comprehensive detection
 
-## 📱 Platform-Specific Behavior
-
-### iOS
-- Uses `window.location.href` for redirects
-- Provides iOS-specific escape instructions
-- Supports Safari deep linking
-
-### Android
-- Uses `window.open()` with fallback to `location.href`
-- Provides Android-specific escape instructions
-- Works with Chrome and other browsers
-
 ## 🔧 Troubleshooting
 
 ### "Can't find variable: exports" Error
@@ -321,14 +322,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Inspired by the need for better user experience in mobile in-app browsers
 - Built with TypeScript for type safety and developer experience
 - Designed to be framework-agnostic for maximum compatibility
-
-## 📊 Usage Statistics
-
-This library helps improve user experience by:
-- Reducing bounce rates from in-app browsers
-- Improving conversion rates for e-commerce sites
-- Providing better functionality access in full browsers
-- Enhancing mobile web app performance
 
 ---
 

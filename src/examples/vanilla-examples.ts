@@ -7,7 +7,7 @@
 
 // Example 1: Basic usage
 /*
-import InAppBrowserEscaper, { InAppBrowserDetector } from 'inappbrowserescaper';
+import InAppBrowserEscaper, { InAppBrowserDetector } from '@jhrunning/inappbrowserescaper';
 
 // Check if user is in an in-app browser
 if (InAppBrowserDetector.isInAppBrowser()) {
