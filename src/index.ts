@@ -422,14 +422,21 @@ export class InAppBrowserEscaper {
     // Platform-specific optimizations
     if (browserInfo.platform === 'ios') {
       // iOS-specific strategies - try Safari schemes FIRST
-      const iosSafariScheme = function iosSafariScheme() {
-        // Preserve original protocol (http/https) in Safari URL scheme
-        const safariUrl = url.replace(/^(https?):\/\//, 'x-safari-$1://');
+      const iosSafariHttps = function iosSafariHttps() {
+        // x-safari-https scheme for iOS (most reliable)
+        const safariUrl = url.replace(/^https?:\/\//, 'x-safari-https://');
         window.location.href = safariUrl;
         return true;
       };
       
-      strategies.push(iosSafariScheme);
+      const iosSafariHttp = function iosSafariHttp() {
+        // Alternative: x-safari-http scheme
+        const safariUrl = url.replace(/^https?:\/\//, 'x-safari-http://');
+        window.location.href = safariUrl;
+        return true;
+      };
+      
+      strategies.push(iosSafariHttps, iosSafariHttp);
     } else if (browserInfo.platform === 'android') {
       // Android-specific strategies - try Android intents FIRST
       const androidIntent = function androidIntent() {
