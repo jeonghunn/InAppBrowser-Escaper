@@ -30,6 +30,8 @@ export interface EscapeOptions {
   force?: boolean;
   /** Show quick visual instructions overlay */
   showQuickInstructions?: boolean;
+  /** Enable debug logging to console (default: false) */
+  debug?: boolean;
 }
 
 /**
@@ -198,7 +200,28 @@ export class InAppBrowserEscaper {
     message: 'For the best experience, please open this in your browser',
     buttonText: '🚀 Open in Browser',
     showModal: false, // Default: auto-redirect when escape() is called
+    debug: false, // Default: no console logs in production
   };
+
+  /**
+   * Internal debug logger - only logs when debug mode is enabled
+   */
+  private static debugLog(message: string, ...args: any[]): void {
+    // Only log if debug mode is explicitly enabled via the last escape() call
+    if (this.defaultOptions.debug) {
+      console.log(`[InAppBrowserEscaper] ${message}`, ...args);
+    }
+  }
+
+  /**
+   * Internal debug warning - only logs when debug mode is enabled
+   */
+  private static debugWarn(message: string, ...args: any[]): void {
+    // Only log if debug mode is explicitly enabled via the last escape() call
+    if (this.defaultOptions.debug) {
+      console.warn(`[InAppBrowserEscaper] ${message}`, ...args);
+    }
+  }
 
   /**
    * Attempts to escape from the in-app browser
@@ -207,6 +230,7 @@ export class InAppBrowserEscaper {
    * - showModal: false (default) → Auto-redirects to external browser
    * - showModal: true → Shows modal with instructions and action button
    * - force: true → Always auto-redirects, even if showModal is true
+   * - debug: true → Enables console logging for debugging
    */
   static escape(options: EscapeOptions = {}): boolean {
     const browserInfo = InAppBrowserDetector.analyze();
