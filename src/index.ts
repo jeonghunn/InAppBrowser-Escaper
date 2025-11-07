@@ -235,11 +235,14 @@ export class InAppBrowserEscaper {
   static escape(options: EscapeOptions = {}): boolean {
     const browserInfo = InAppBrowserDetector.analyze();
     
+    // Update debug mode setting
+    const config = { ...this.defaultOptions, ...options };
+    this.defaultOptions.debug = config.debug || false;
+    
     if (!browserInfo.isInApp && !options.force) {
       return false; // Already in a regular browser
     }
 
-    const config = { ...this.defaultOptions, ...options };
     const currentUrl = config.fallbackUrl || window.location.href;
 
     // Force mode takes priority - always auto-redirect
@@ -399,12 +402,12 @@ export class InAppBrowserEscaper {
    * Performs the redirect to open in external browser
    */
   private static performRedirect(url: string, browserInfo: BrowserInfo): void {
-    console.log('InAppBrowserEscaper: Starting enhanced redirect for:', url);
-    console.log('Browser info:', browserInfo);
+    this.debugLog('Starting enhanced redirect for:', url);
+    this.debugLog('Browser info:', browserInfo);
     
     // Enhanced redirect strategies with multiple fallbacks
     const strategies = this.getRedirectStrategies(url, browserInfo);
-    console.log(`InAppBrowserEscaper: Found ${strategies.length} strategies to try`);
+    this.debugLog(`Found ${strategies.length} strategies to try`);
     
     this.executeStrategiesSequentially(strategies, url, 0);
   }
@@ -414,21 +417,21 @@ export class InAppBrowserEscaper {
    */
   private static executeStrategiesSequentially(strategies: Array<() => boolean>, url: string, index: number): void {
     if (index >= strategies.length) {
-      console.warn('InAppBrowserEscaper: All strategies failed, using final fallback');
+      this.debugWarn('All strategies failed, using final fallback');
       window.location.href = url;
       return;
     }
     
     const strategy = strategies[index];
-    console.log(`InAppBrowserEscaper: Trying strategy ${index + 1}/${strategies.length}: ${strategy.name}`);
+    this.debugLog(`Trying strategy ${index + 1}/${strategies.length}: ${strategy.name}`);
     
     try {
       if (strategy()) {
-        console.log('InAppBrowserEscaper: Redirect successful with strategy:', strategy.name);
+        this.debugLog('Redirect successful with strategy:', strategy.name);
         return;
       }
     } catch (error) {
-      console.warn(`InAppBrowserEscaper: Strategy ${strategy.name} failed:`, error);
+      this.debugWarn(`Strategy ${strategy.name} failed:`, error);
     }
     
     // Try next strategy after a small delay
