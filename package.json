@@ -28,7 +28,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "rimraf dist && npm run build:node && npm run build:browser && npm run build:react && npm run build:browser-wrapper",
+    "build": "rimraf dist && npm run build:node && npm run build:browser && npm run build:react && npm run build:angular && npm run build:browser-wrapper",
     "build:node": "tsc",
     "build:browser": "tsc -p tsconfig.browser.json",
     "build:browser-wrapper": "node scripts/build-browser.js",
