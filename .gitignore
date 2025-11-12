@@ -12,6 +12,10 @@ src/browser/
 *.js
 *.js.map
 
+# Test applications (for local development only)
+test-angular-app/
+test-react-app/
+
 # But keep config files and scripts
 !*.config.js
 !jest.config.js

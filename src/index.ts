@@ -652,5 +652,9 @@ export class InAppBrowserEscaper {
   }
 }
 
-// Default export for convenience
+// Default export for convenience - export the main class
+// Named exports for direct access to individual classes
 export default InAppBrowserEscaper;
+
+// Also attach the detector class to the default export for easier imports
+(InAppBrowserEscaper as any).InAppBrowserDetector = InAppBrowserDetector;
