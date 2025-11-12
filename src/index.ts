@@ -30,6 +30,8 @@ export interface EscapeOptions {
   force?: boolean;
   /** Show quick visual instructions overlay */
   showQuickInstructions?: boolean;
+  /** Enable debug logging to console (default: false) */
+  debug?: boolean;
 }
 
 /**
@@ -198,7 +200,28 @@ export class InAppBrowserEscaper {
     message: 'For the best experience, please open this in your browser',
     buttonText: '🚀 Open in Browser',
     showModal: false, // Default: auto-redirect when escape() is called
+    debug: false, // Default: no console logs in production
   };
+
+  /**
+   * Internal debug logger - only logs when debug mode is enabled
+   */
+  private static debugLog(message: string, ...args: any[]): void {
+    // Only log if debug mode is explicitly enabled via the last escape() call
+    if (this.defaultOptions.debug) {
+      console.log(`[InAppBrowserEscaper] ${message}`, ...args);
+    }
+  }
+
+  /**
+   * Internal debug warning - only logs when debug mode is enabled
+   */
+  private static debugWarn(message: string, ...args: any[]): void {
+    // Only log if debug mode is explicitly enabled via the last escape() call
+    if (this.defaultOptions.debug) {
+      console.warn(`[InAppBrowserEscaper] ${message}`, ...args);
+    }
+  }
 
   /**
    * Attempts to escape from the in-app browser
@@ -207,15 +230,19 @@ export class InAppBrowserEscaper {
    * - showModal: false (default) → Auto-redirects to external browser
    * - showModal: true → Shows modal with instructions and action button
    * - force: true → Always auto-redirects, even if showModal is true
+   * - debug: true → Enables console logging for debugging
    */
   static escape(options: EscapeOptions = {}): boolean {
     const browserInfo = InAppBrowserDetector.analyze();
+    
+    // Update debug mode setting
+    const config = { ...this.defaultOptions, ...options };
+    this.defaultOptions.debug = config.debug || false;
     
     if (!browserInfo.isInApp && !options.force) {
       return false; // Already in a regular browser
     }
 
-    const config = { ...this.defaultOptions, ...options };
     const currentUrl = config.fallbackUrl || window.location.href;
 
     // Force mode takes priority - always auto-redirect
@@ -375,12 +402,12 @@ export class InAppBrowserEscaper {
    * Performs the redirect to open in external browser
    */
   private static performRedirect(url: string, browserInfo: BrowserInfo): void {
-    console.log('InAppBrowserEscaper: Starting enhanced redirect for:', url);
-    console.log('Browser info:', browserInfo);
+    this.debugLog('Starting enhanced redirect for:', url);
+    this.debugLog('Browser info:', browserInfo);
     
     // Enhanced redirect strategies with multiple fallbacks
     const strategies = this.getRedirectStrategies(url, browserInfo);
-    console.log(`InAppBrowserEscaper: Found ${strategies.length} strategies to try`);
+    this.debugLog(`Found ${strategies.length} strategies to try`);
     
     this.executeStrategiesSequentially(strategies, url, 0);
   }
@@ -390,21 +417,21 @@ export class InAppBrowserEscaper {
    */
   private static executeStrategiesSequentially(strategies: Array<() => boolean>, url: string, index: number): void {
     if (index >= strategies.length) {
-      console.warn('InAppBrowserEscaper: All strategies failed, using final fallback');
+      this.debugWarn('All strategies failed, using final fallback');
       window.location.href = url;
       return;
     }
     
     const strategy = strategies[index];
-    console.log(`InAppBrowserEscaper: Trying strategy ${index + 1}/${strategies.length}: ${strategy.name}`);
+    this.debugLog(`Trying strategy ${index + 1}/${strategies.length}: ${strategy.name}`);
     
     try {
       if (strategy()) {
-        console.log('InAppBrowserEscaper: Redirect successful with strategy:', strategy.name);
+        this.debugLog('Redirect successful with strategy:', strategy.name);
         return;
       }
     } catch (error) {
-      console.warn(`InAppBrowserEscaper: Strategy ${strategy.name} failed:`, error);
+      this.debugWarn(`Strategy ${strategy.name} failed:`, error);
     }
     
     // Try next strategy after a small delay
@@ -422,14 +449,14 @@ export class InAppBrowserEscaper {
     // Platform-specific optimizations
     if (browserInfo.platform === 'ios') {
       // iOS-specific strategies - try Safari schemes FIRST
-      const iosSafariScheme = function iosSafariScheme() {
-        // Preserve original protocol (http/https) in Safari URL scheme
-        const safariUrl = url.replace(/^(https?):\/\//, 'x-safari-$1://');
+      const iosSafariHttps = function iosSafariHttps() {
+        // x-safari-https scheme for iOS (most reliable)
+        const safariUrl = url.replace(/^https?:\/\//, 'x-safari-https://');
         window.location.href = safariUrl;
         return true;
       };
       
-      strategies.push(iosSafariScheme);
+      strategies.push(iosSafariHttps);
     } else if (browserInfo.platform === 'android') {
       // Android-specific strategies - try Android intents FIRST
       const androidIntent = function androidIntent() {
@@ -625,5 +652,9 @@ export class InAppBrowserEscaper {
   }
 }
 
-// Default export for convenience
+// Default export for convenience - export the main class
+// Named exports for direct access to individual classes
 export default InAppBrowserEscaper;
+
+// Also attach the detector class to the default export for easier imports
+(InAppBrowserEscaper as any).InAppBrowserDetector = InAppBrowserDetector;

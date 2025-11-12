@@ -1,20 +1,26 @@
 {
   "name": "@jhrunning/inappbrowserescaper",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "description": "A TypeScript library to help users escape from in-app browsers like Instagram, Facebook, Telegram, etc.",
-  "type": "commonjs",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/esm/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
       "require": "./dist/index.js",
-      "default": "./dist/index.js"
+      "default": "./dist/esm/index.js"
     },
     "./react": {
       "types": "./dist/react/react.d.ts",
       "require": "./dist/react/react.js",
       "default": "./dist/react/react.js"
+    },
+    "./angular": {
+      "types": "./dist/angular/angular.d.ts",
+      "require": "./dist/angular/angular.js",
+      "default": "./dist/angular/angular.js"
     },
     "./package.json": "./package.json"
   },
@@ -28,13 +34,15 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "rimraf dist && npm run build:node && npm run build:browser && npm run build:react && npm run build:browser-wrapper",
+    "build": "rimraf dist && npm run build:cjs && npm run build:esm && npm run build:browser && npm run build:react && npm run build:angular && npm run build:browser-wrapper",
+    "build:cjs": "tsc",
+    "build:esm": "tsc -p tsconfig.esm.json",
     "build:node": "tsc",
     "build:browser": "tsc -p tsconfig.browser.json",
     "build:browser-wrapper": "node scripts/build-browser.js",
     "build:react": "tsc -p tsconfig.react.json",
     "build:angular": "tsc -p tsconfig.angular.json",
-    "build:all": "rimraf dist && npm run build:node && npm run build:browser && npm run build:react && npm run build:angular && npm run build:browser-wrapper",
+    "build:all": "rimraf dist && npm run build:cjs && npm run build:esm && npm run build:browser && npm run build:react && npm run build:angular && npm run build:browser-wrapper",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -53,7 +61,7 @@
     "react",
     "angular"
   ],
-  "author": "",
+  "author": "JHRUNNING",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -84,6 +92,8 @@
     }
   },
   "devDependencies": {
+    "@angular/common": "^17.0.0",
+    "@angular/core": "^17.0.0",
     "@types/jest": "^30.0.0",
     "@types/jsdom": "^21.1.7",
     "@types/node": "^24.2.1",
@@ -92,9 +102,12 @@
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
     "jsdom": "^26.1.0",
+    "react": "^18.2.0",
     "rimraf": "^6.0.1",
+    "rxjs": "~7.8.0",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "zone.js": "~0.14.2"
   }
 }

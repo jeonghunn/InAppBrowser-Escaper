@@ -1,5 +1,15 @@
-import { Injectable } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { 
+  Injectable, 
+  PLATFORM_ID, 
+  Inject, 
+  Directive, 
+  Input, 
+  HostListener, 
+  OnInit, 
+  Component,
+  NgModule 
+} from '@angular/core';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import {
   BehaviorSubject,
   Observable,
@@ -90,8 +100,6 @@ export class InAppBrowserEscaperService {
 /**
  * Angular Directive for InAppBrowserEscaper
  */
-import { Directive, Input, HostListener, OnInit } from '@angular/core';
-
 @Directive({
   selector: '[appInAppEscape]'
 })
@@ -116,8 +124,6 @@ export class InAppBrowserEscapeDirective implements OnInit {
 /**
  * Angular Component for showing escape button
  */
-import { Component, Input, OnInit } from '@angular/core';
-
 @Component({
   selector: 'app-in-app-escape-button',
   template: `
@@ -154,9 +160,6 @@ export class InAppBrowserEscapeButtonComponent implements OnInit {
 /**
  * Angular Module for InAppBrowserEscaper
  */
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
 @NgModule({
   declarations: [
     InAppBrowserEscapeDirective,
