@@ -92,6 +92,19 @@
             border-radius: 4px;
             overflow-x: auto;
         }
+        #debug-log {
+            background: #111;
+            color: #e6ffe6;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            max-height: 260px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
     </style>
 </head>
 <body>
@@ -126,6 +139,22 @@
             <button type="button" class="button" onclick="testCopyUrl()">
                 Copy URL to Clipboard
             </button>
+
+            <button type="button" class="button warning" onclick="testInstagramExtBrowser()">
+                📷 Test Instagram extbrowser
+            </button>
+
+            <button type="button" class="button warning" onclick="testLibraryInstagramDebug()">
+                🧪 Test library Instagram debug
+            </button>
+
+            <button type="button" class="button warning" onclick="testInstagramExtBrowserNoSlash()">
+                📷 Test Instagram extbrowser no slash
+            </button>
+
+            <button type="button" class="button warning" onclick="testWebSearchScheme()">
+                🔎 Test x-web-search
+            </button>
         </div>
     </div>
 
@@ -156,6 +185,12 @@
         <h2>📊 Detection Results</h2>
         <div id="detection-results"></div>
         <div id="test-results"></div>
+    </div>
+
+    <div class="demo-section">
+        <h2>🧪 Debug Log</h2>
+        <button type="button" class="button secondary" onclick="clearDebugLog()">Clear Debug Log</button>
+        <pre id="debug-log">Waiting for debug events...</pre>
     </div>
 
     <div class="demo-section">
@@ -222,6 +257,29 @@ InAppBrowserEscaper.escape({
         
         // Access the library from the global scope
         const { InAppBrowserDetector, InAppBrowserEscaper } = window.InAppBrowserEscaper;
+
+        function debugLog(label, data) {
+            const el = document.getElementById('debug-log');
+            if (!el) return;
+
+            if (el.textContent === 'Waiting for debug events...') {
+                el.textContent = '';
+            }
+
+            const line = `[${new Date().toLocaleTimeString()}] ${label}${data ? `\n${JSON.stringify(data, null, 2)}` : ''}\n`;
+            el.textContent += line;
+            el.scrollTop = el.scrollHeight;
+        }
+
+        function clearDebugLog() {
+            const el = document.getElementById('debug-log');
+            if (el) el.textContent = '';
+        }
+
+        window.addEventListener('inAppBrowserEscaper:debug', function(event) {
+            debugLog(`library:${event.detail.type}`, event.detail);
+            addTestResult(`Debug: ${event.detail.type}`);
+        });
         
         function updateBrowserInfo() {
             const info = InAppBrowserDetector.analyze();
@@ -279,9 +337,14 @@ InAppBrowserEscaper.escape({
         function testBasicEscape() {
             const url = 'https://jhrun.com';
             addTestResult(`🧪 Testing basic escape with URL: ${url}`);
+            debugLog('demo:testBasicEscape', {
+                url,
+                browserInfo: InAppBrowserDetector.analyze()
+            });
             InAppBrowserEscaper.escape({
                 fallbackUrl: url,
                 showModal: true,
+                debug: true,
             });
         }
         
@@ -290,14 +353,19 @@ InAppBrowserEscaper.escape({
                 message: '🛍️ For secure checkout and the best shopping experience, please open this in your browser',
                 buttonText: '🔒 Shop Securely',
                 showModal: true,
-                fallbackUrl: 'https://jhrun.com'
+                fallbackUrl: 'https://jhrun.com',
+                debug: true,
             });
         }
         
         function testAutoRedirect() {
             if (InAppBrowserDetector.isInAppBrowser()) {
+                debugLog('demo:testAutoRedirect', {
+                    browserInfo: InAppBrowserDetector.analyze()
+                });
                 InAppBrowserEscaper.escape({
-                    fallbackUrl: 'https://jhrun.com'
+                    fallbackUrl: 'https://jhrun.com',
+                    debug: true,
                 });
                 addTestResult('Auto-redirect attempted with enhanced strategies');
             } else {
@@ -307,10 +375,14 @@ InAppBrowserEscaper.escape({
         
         function testForceEscape() {
             addTestResult('🚀 Testing force escape with quick instructions...');
+            debugLog('demo:testForceEscape', {
+                browserInfo: InAppBrowserDetector.analyze()
+            });
             InAppBrowserEscaper.escape({ 
                 force: true, 
                 showQuickInstructions: true,
-                fallbackUrl: 'https://jhrun.com' 
+                fallbackUrl: 'https://jhrun.com',
+                debug: true,
             });
             addTestResult('Force escape completed - check console for strategy details');
         }
@@ -333,6 +405,49 @@ InAppBrowserEscaper.escape({
             }, 1000);
         }
         
+        function testInstagramExtBrowser() {
+            const url = 'https://jhrun.com';
+            const schemeUrl = `instagram://extbrowser/?url=${encodeURIComponent(url)}`;
+            addTestResult(`Testing Instagram extbrowser: ${schemeUrl}`);
+            debugLog('demo:testInstagramExtBrowser', { url, schemeUrl });
+            // Navigate synchronously inside the tap to preserve the iOS user gesture.
+            debugLog('demo:set-location', { schemeUrl });
+            window.location.href = schemeUrl;
+        }
+
+        function testLibraryInstagramDebug() {
+            const url = 'https://jhrun.com';
+            const browserInfo = InAppBrowserDetector.analyze();
+            addTestResult(`Testing library Instagram debug with URL: ${url}`);
+            debugLog('demo:testLibraryInstagramDebug', { url, browserInfo });
+            InAppBrowserEscaper.escape({
+                fallbackUrl: url,
+                showModal: true,
+                buttonText: 'Open via Library',
+                debug: true,
+            });
+        }
+
+        function testInstagramExtBrowserNoSlash() {
+            const url = 'https://jhrun.com';
+            const schemeUrl = `instagram://extbrowser?url=${encodeURIComponent(url)}`;
+            addTestResult(`Testing Instagram extbrowser no slash: ${schemeUrl}`);
+            debugLog('demo:testInstagramExtBrowserNoSlash', { url, schemeUrl });
+            // Navigate synchronously inside the tap to preserve the iOS user gesture.
+            debugLog('demo:set-location', { schemeUrl });
+            window.location.href = schemeUrl;
+        }
+
+        function testWebSearchScheme() {
+            const schemeUrl = 'x-web-search://?jhrun.com';
+            addTestResult(`Testing web search scheme: ${schemeUrl}`);
+            debugLog('demo:testWebSearchScheme', { schemeUrl });
+            setTimeout(() => {
+                debugLog('demo:set-location', { schemeUrl });
+                window.location.href = schemeUrl;
+            }, 1000);
+        }
+
         async function testCopyUrl() {
             const success = await InAppBrowserEscaper.copyUrlToClipboard();
             if (success) {
@@ -452,7 +567,8 @@ InAppBrowserEscaper.escape({
                         message: '🎉 Welcome to the InAppBrowserEscaper demo! You\'re currently in an in-app browser. This modal demonstrates the enhanced escape functionality with multiple Safari URL schemes.',
                         buttonText: '🚀 Open in Browser',
                         fallbackUrl: 'https://jhrun.com',
-                        showModal: true
+                        showModal: true,
+                        debug: true,
                     });
                     addTestResult('🎉 Auto-showed escape modal for in-app browser');
                 }, 1500);

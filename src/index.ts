@@ -214,6 +214,28 @@ export class InAppBrowserEscaper {
   }
 
   /**
+   * Emits browser-visible debug events. Useful for mobile in-app browsers where console access is hard.
+   */
+  private static emitDebugEvent(type: string, detail: Record<string, any> = {}): void {
+    // Only emit when debug mode is enabled, mirroring debugLog/debugWarn.
+    if (!this.defaultOptions.debug) {
+      return;
+    }
+
+    if (typeof window === 'undefined' || typeof window.dispatchEvent !== 'function') {
+      return;
+    }
+
+    window.dispatchEvent(new CustomEvent('inAppBrowserEscaper:debug', {
+      detail: {
+        type,
+        timestamp: new Date().toISOString(),
+        ...detail,
+      },
+    }));
+  }
+
+  /**
    * Internal debug warning - only logs when debug mode is enabled
    */
   private static debugWarn(message: string, ...args: any[]): void {
@@ -238,17 +260,30 @@ export class InAppBrowserEscaper {
     // Update debug mode setting
     const config = { ...this.defaultOptions, ...options };
     this.defaultOptions.debug = config.debug || false;
+    this.emitDebugEvent('escape:start', {
+      browserInfo,
+      options: config,
+    });
     
     if (!browserInfo.isInApp && !options.force) {
+      this.emitDebugEvent('escape:skip-not-in-app', { browserInfo });
       return false; // Already in a regular browser
     }
 
     const currentUrl = config.fallbackUrl || window.location.href;
+    this.emitDebugEvent('escape:url-selected', { currentUrl });
 
-    // Force mode takes priority - always auto-redirect
+    // Force mode takes priority - always auto-redirect.
+    // Instagram iOS needs the same simple tap-triggered navigation path used by the demo buttons.
     if (config.force) {
-      this.performRedirect(currentUrl, browserInfo);
-      this.copyUrlToClipboard(currentUrl);
+      if (this.requiresInstagramIOSGesture(browserInfo)) {
+        this.emitDebugEvent('escape:force-instagram-ios', { currentUrl, browserInfo });
+        this.openInstagramIOSFromTap(currentUrl, browserInfo);
+      } else {
+        this.emitDebugEvent('escape:force-redirect', { currentUrl, browserInfo });
+        this.performRedirect(currentUrl, browserInfo);
+        this.copyUrlToClipboard(currentUrl);
+      }
       
       if (config.showQuickInstructions) {
         this.showQuickInstructions(currentUrl, browserInfo);
@@ -257,13 +292,23 @@ export class InAppBrowserEscaper {
       return true;
     }
 
-    // Show modal if explicitly requested
-    if (config.showModal) {
+    // Instagram iOS now requires a real user gesture for external-browser handoff.
+    // Auto-redirect from page load is blocked in recent Instagram versions, but a tapped button works.
+    const requiresUserGesture = this.requiresInstagramIOSGesture(browserInfo);
+
+    // Show modal if explicitly requested, or when the app requires a user gesture.
+    if (config.showModal || requiresUserGesture) {
+      this.emitDebugEvent('escape:show-modal', {
+        currentUrl,
+        requiresUserGesture,
+        browserInfo,
+      });
       this.showEscapeModal(currentUrl, config, browserInfo);
       return true;
     }
 
     // Otherwise, auto-redirect (default behavior)
+    this.emitDebugEvent('escape:auto-redirect', { currentUrl, browserInfo });
     this.performRedirect(currentUrl, browserInfo);
     
     // Show quick instructions if explicitly requested
@@ -356,12 +401,20 @@ export class InAppBrowserEscaper {
     const openBtn = content.querySelector('#escaper-open-btn');
     const closeBtn = content.querySelector('#escaper-close-btn');
 
-    openBtn?.addEventListener('click', () => {
-      // Use the same enhanced redirect strategies for all platforms
-      this.performRedirect(url, browserInfo);
-      this.copyUrlToClipboard(url);
-      this.closeModal(modal);
-    });
+    if (this.requiresInstagramIOSGesture(browserInfo)) {
+      openBtn?.addEventListener('click', () => {
+        // Keep this path as close as possible to the demo button that Instagram accepts.
+        this.emitDebugEvent('modal:instagram-ios-button-click', { url, browserInfo });
+        this.openInstagramIOSFromTap(url, browserInfo);
+      });
+    } else {
+      openBtn?.addEventListener('click', () => {
+        // Use the same enhanced redirect strategies for all other platforms
+        this.performRedirect(url, browserInfo);
+        this.copyUrlToClipboard(url);
+        this.closeModal(modal);
+      });
+    }
 
     closeBtn?.addEventListener('click', () => {
       this.closeModal(modal);
@@ -374,7 +427,14 @@ export class InAppBrowserEscaper {
    * Gets platform-specific escape instructions
    */
   private static getEscapeInstructions(browserInfo: BrowserInfo): string {
-    if (browserInfo.platform === 'ios') {
+    if (browserInfo.platform === 'ios' && browserInfo.appName === 'instagram') {
+      return `
+        <strong>On Instagram iOS:</strong><br>
+        1. Tap "Open in Browser" below<br>
+        2. If Instagram blocks it, tap the menu/share button → "Open in browser" or "Open in Safari"<br>
+        3. URL is copied to clipboard as backup
+      `;
+    } else if (browserInfo.platform === 'ios') {
       return `
         <strong>On iOS:</strong><br>
         1. Tap "Open in Browser" below (tries multiple Safari schemes)<br>
@@ -448,15 +508,14 @@ export class InAppBrowserEscaper {
 
     // Platform-specific optimizations
     if (browserInfo.platform === 'ios') {
-      // iOS-specific strategies - try Safari schemes FIRST
-      const iosSafariHttps = function iosSafariHttps() {
-        // x-safari-https scheme for iOS (most reliable)
-        const safariUrl = url.replace(/^https?:\/\//, 'x-safari-https://');
-        window.location.href = safariUrl;
+      // iOS-specific strategies - app-specific escape hatches first, Safari scheme fallback second.
+      const iosPrimaryEscape = function iosPrimaryEscape() {
+        const escapeUrl = InAppBrowserEscaper.getIOSRedirectUrl(url, browserInfo);
+        window.location.href = escapeUrl;
         return true;
       };
       
-      strategies.push(iosSafariHttps);
+      strategies.push(iosPrimaryEscape);
     } else if (browserInfo.platform === 'android') {
       // Android-specific strategies - try Android intents FIRST
       const androidIntent = function androidIntent() {
@@ -550,6 +609,39 @@ export class InAppBrowserEscaper {
     );
 
     return strategies;
+  }
+
+  /**
+   * Checks whether the detected browser needs a tap-only Instagram iOS navigation path.
+   */
+  private static requiresInstagramIOSGesture(browserInfo: BrowserInfo): boolean {
+    return browserInfo.platform === 'ios' && browserInfo.appName === 'instagram';
+  }
+
+  /**
+   * Opens Instagram iOS external browser from a user tap.
+   * Keep this intentionally simple: copy the URL as a backup, then navigate
+   * synchronously inside the tap so the iOS user gesture is preserved.
+   * No delay, no modal removal, no strategy fallbacks.
+   */
+  private static openInstagramIOSFromTap(url: string, browserInfo: BrowserInfo): void {
+    const escapeUrl = this.getIOSRedirectUrl(url, browserInfo);
+    // Best-effort clipboard backup so the modal's instructions are accurate if the
+    // custom scheme is blocked. Fire-and-forget to keep navigation in the gesture.
+    void this.copyUrlToClipboard(url);
+    this.emitDebugEvent('instagram-ios:set-location', { url, escapeUrl, browserInfo });
+    window.location.href = escapeUrl;
+  }
+
+  /**
+   * Gets the primary iOS redirect URL for the detected in-app browser.
+   */
+  private static getIOSRedirectUrl(url: string, browserInfo: BrowserInfo): string {
+    if (browserInfo.appName === 'instagram' && /^https?:\/\//.test(url)) {
+      return `instagram://extbrowser/?url=${encodeURIComponent(url)}`;
+    }
+
+    return url.replace(/^https?:\/\//, 'x-safari-https://');
   }
 
   /**
