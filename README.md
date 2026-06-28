@@ -102,7 +102,7 @@ if (InAppBrowserDetector.isInAppBrowser()) {
 document.addEventListener('DOMContentLoaded', () => {
   if (InAppBrowserDetector.isInAppBrowser()) {
     InAppBrowserEscaper.escape({
-      autoRedirect: true // Automatically attempt to open in external browser
+      message: 'For the best experience, please open this in your browser'
     });
   }
 });
@@ -194,11 +194,10 @@ Attempts to help the user escape from the in-app browser.
 
 **Options:**
 - `message?: string` - Custom message to display (default: "For the best experience, please open this in your browser")
-- `buttonText?: string` - Custom button text (default: "Open in Browser")
-- `showModal?: boolean` - Whether to show the escape modal (default: true)
-- `autoRedirect?: boolean` - Attempt automatic redirect (default: false)
+- `buttonText?: string` - Custom button text (default: "🚀 Open in Browser")
+- `showModal?: boolean` - Whether to show the escape modal (default: false; Instagram iOS may show one automatically to preserve a tap gesture)
 - `fallbackUrl?: string` - Custom URL to redirect to (default: current URL)
-- `force?: boolean` - Force redirect attempt even when not in an in-app browser and copy URL to clipboard (default: false)
+- `force?: boolean` - Force an escape attempt even when not in an in-app browser; Instagram iOS still requires an active user gesture (default: false)
 - `showQuickInstructions?: boolean` - Show quick instructions overlay with platform-specific guidance (default: false)
 
 #### `copyUrlToClipboard(url?: string): Promise<boolean>`
@@ -262,9 +261,8 @@ if (InAppBrowserDetector.isInAppBrowser()) {
 ```typescript
 const browserInfo = InAppBrowserDetector.analyze();
 if (browserInfo.isInApp && browserInfo.appName === 'instagram') {
-  // Instagram has limited PWA support
+  // Instagram iOS needs a real tap, so the library shows a gesture-preserving modal.
   InAppBrowserEscaper.escape({
-    autoRedirect: true,
     message: 'This app works best in your browser'
   });
 }
