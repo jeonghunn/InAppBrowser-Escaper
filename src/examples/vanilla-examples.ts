@@ -44,16 +44,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 */
 
-// Example 3: Auto-redirect for specific apps
+// Example 3: App-specific escape behavior
 /*
 document.addEventListener('DOMContentLoaded', () => {
   const browserInfo = InAppBrowserDetector.analyze();
   
   if (browserInfo.isInApp) {
-    // Auto-redirect for Instagram and Facebook
+    // Use the default escape behavior for Instagram and Facebook.
+    // Instagram iOS shows a tap-preserving modal when needed.
     if (browserInfo.appName === 'instagram' || browserInfo.appName === 'facebook') {
       InAppBrowserEscaper.escape({
-        autoRedirect: true,
         showModal: false
       });
     } else {

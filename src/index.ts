@@ -251,7 +251,7 @@ export class InAppBrowserEscaper {
    * Behavior:
    * - showModal: false (default) → Auto-redirects to external browser
    * - showModal: true → Shows modal with instructions and action button
-   * - force: true → Always auto-redirects, even if showModal is true
+   * - force: true → Attempts redirect even outside detected in-app browsers
    * - debug: true → Enables console logging for debugging
    */
   static escape(options: EscapeOptions = {}): boolean {
@@ -273,12 +273,18 @@ export class InAppBrowserEscaper {
     const currentUrl = config.fallbackUrl || window.location.href;
     this.emitDebugEvent('escape:url-selected', { currentUrl });
 
-    // Force mode takes priority - always auto-redirect.
-    // Instagram iOS needs the same simple tap-triggered navigation path used by the demo buttons.
+    // Force mode takes priority. Instagram iOS still needs a real tap, so avoid
+    // auto-navigation when escape() is called from page load or another async path.
     if (config.force) {
       if (this.requiresInstagramIOSGesture(browserInfo)) {
-        this.emitDebugEvent('escape:force-instagram-ios', { currentUrl, browserInfo });
-        this.openInstagramIOSFromTap(currentUrl, browserInfo);
+        if (this.hasActiveUserGesture()) {
+          this.emitDebugEvent('escape:force-instagram-ios', { currentUrl, browserInfo });
+          this.openInstagramIOSFromTap(currentUrl, browserInfo);
+        } else {
+          this.emitDebugEvent('escape:force-instagram-ios-modal', { currentUrl, browserInfo });
+          this.showEscapeModal(currentUrl, config, browserInfo);
+          return true;
+        }
       } else {
         this.emitDebugEvent('escape:force-redirect', { currentUrl, browserInfo });
         this.performRedirect(currentUrl, browserInfo);
@@ -619,6 +625,14 @@ export class InAppBrowserEscaper {
   }
 
   /**
+   * Checks whether the browser currently exposes an active user gesture.
+   */
+  private static hasActiveUserGesture(): boolean {
+    const userActivation = (navigator as any).userActivation;
+    return userActivation?.isActive === true;
+  }
+
+  /**
    * Opens Instagram iOS external browser from a user tap.
    * Keep this intentionally simple: copy the URL as a backup, then navigate
    * synchronously inside the tap so the iOS user gesture is preserved.
@@ -718,7 +732,7 @@ export class InAppBrowserEscaper {
           ${instructions}
         </p>
         <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <p style="margin: 0; font-size: 14px;">URL copied to clipboard!</p>
+          <p style="margin: 0; font-size: 14px;">If it does not open, copy the URL from the address bar.</p>
         </div>
         <button onclick="this.parentElement.parentElement.remove()" style="
           background: #007AFF;

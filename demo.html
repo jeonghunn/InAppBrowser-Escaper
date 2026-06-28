@@ -140,16 +140,8 @@
                 Copy URL to Clipboard
             </button>
 
-            <button type="button" class="button warning" onclick="testInstagramExtBrowser()">
-                📷 Test Instagram extbrowser
-            </button>
-
-            <button type="button" class="button warning" onclick="testLibraryInstagramDebug()">
-                🧪 Test library Instagram debug
-            </button>
-
-            <button type="button" class="button warning" onclick="testInstagramExtBrowserNoSlash()">
-                📷 Test Instagram extbrowser no slash
+            <button type="button" class="button warning" onclick="testInstagramLibraryEscape()">
+                📷 Test Instagram Library Escape
             </button>
 
             <button type="button" class="button warning" onclick="testWebSearchScheme()">
@@ -228,7 +220,7 @@ if (InAppBrowserDetector.isInAppBrowser()) {
         <h3>Auto-redirect (default behavior):</h3>
         <pre><code>const browserInfo = InAppBrowserDetector.analyze();
 if (browserInfo.appName === 'instagram') {
-  // Calling escape() without showModal will auto-redirect
+  // Instagram iOS shows a gesture-preserving modal when needed
   InAppBrowserEscaper.escape();
 }</code></pre>
 
@@ -405,37 +397,18 @@ InAppBrowserEscaper.escape({
             }, 1000);
         }
         
-        function testInstagramExtBrowser() {
+        function testInstagramLibraryEscape() {
             const url = 'https://jhrun.com';
-            const schemeUrl = `instagram://extbrowser/?url=${encodeURIComponent(url)}`;
-            addTestResult(`Testing Instagram extbrowser: ${schemeUrl}`);
-            debugLog('demo:testInstagramExtBrowser', { url, schemeUrl });
-            // Navigate synchronously inside the tap to preserve the iOS user gesture.
-            debugLog('demo:set-location', { schemeUrl });
-            window.location.href = schemeUrl;
-        }
-
-        function testLibraryInstagramDebug() {
-            const url = 'https://jhrun.com';
-            const browserInfo = InAppBrowserDetector.analyze();
-            addTestResult(`Testing library Instagram debug with URL: ${url}`);
-            debugLog('demo:testLibraryInstagramDebug', { url, browserInfo });
+            addTestResult(`Testing library Instagram escape with URL: ${url}`);
+            debugLog('demo:testInstagramLibraryEscape', {
+                url,
+                browserInfo: InAppBrowserDetector.analyze()
+            });
             InAppBrowserEscaper.escape({
                 fallbackUrl: url,
-                showModal: true,
-                buttonText: 'Open via Library',
+                force: true,
                 debug: true,
             });
-        }
-
-        function testInstagramExtBrowserNoSlash() {
-            const url = 'https://jhrun.com';
-            const schemeUrl = `instagram://extbrowser?url=${encodeURIComponent(url)}`;
-            addTestResult(`Testing Instagram extbrowser no slash: ${schemeUrl}`);
-            debugLog('demo:testInstagramExtBrowserNoSlash', { url, schemeUrl });
-            // Navigate synchronously inside the tap to preserve the iOS user gesture.
-            debugLog('demo:set-location', { schemeUrl });
-            window.location.href = schemeUrl;
         }
 
         function testWebSearchScheme() {

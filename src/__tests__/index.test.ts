@@ -253,6 +253,12 @@ describe('InAppBrowserEscaper', () => {
       value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       writable: true,
     });
+
+    Object.defineProperty(window.navigator, 'userActivation', {
+      value: undefined,
+      writable: true,
+      configurable: true,
+    });
   });
 
   describe('escape', () => {
@@ -543,19 +549,20 @@ describe('InAppBrowserEscaper', () => {
 
     it('should show quick instructions when explicitly requested', () => {
       Object.defineProperty(window.navigator, 'userAgent', {
-        value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 Instagram',
+        value: 'Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.6723.58 Mobile Safari/537.36',
         writable: true,
       });
 
       const result = InAppBrowserEscaper.escape({ 
-        showQuickInstructions: true
+        showQuickInstructions: true,
+        fallbackUrl: 'https://example.com'
       });
       
       expect(result).toBe(true);
       
-      // Should show quick instructions overlay
-      const overlay = document.querySelector('[style*="z-index: 999999"]');
-      expect(overlay).toBeTruthy();
+      expect(document.body.textContent).toContain('Tap the menu');
+      expect(document.body.textContent).toContain('copy the URL from the address bar');
+      expect(document.querySelector('#escaper-open-btn')).toBeFalsy();
     });
 
     it('should combine force with showQuickInstructions', () => {
@@ -575,7 +582,7 @@ describe('InAppBrowserEscaper', () => {
       expect(overlay).toBeTruthy();
     });
 
-    it('should prioritize force mode over showModal', () => {
+    it('should show only the Instagram iOS modal in force mode without an active user gesture', () => {
       Object.defineProperty(window.navigator, 'userAgent', {
         value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 Instagram',
         writable: true,
@@ -583,20 +590,29 @@ describe('InAppBrowserEscaper', () => {
 
       const result = InAppBrowserEscaper.escape({ 
         force: true,
-        showModal: true // This should be ignored
+        showModal: true,
+        showQuickInstructions: true
       });
       
       expect(result).toBe(true);
       
-      // Should NOT show modal or instructions (force without showQuickInstructions)
-      const overlay = document.querySelector('[style*="z-index: 999999"]');
-      expect(overlay).toBeFalsy();
+      // Instagram iOS cannot escape from page load or another async path without
+      // losing the user gesture, so force mode falls back to the modal.
+      const overlays = document.querySelectorAll('[style*="z-index: 999999"]');
+      expect(overlays).toHaveLength(1);
+      expect(document.querySelector('#escaper-open-btn')).toBeTruthy();
+      expect(document.body.textContent).not.toContain('URL copied to clipboard!');
     });
 
-    it('should navigate to Instagram extbrowser in force mode', () => {
+    it('should navigate to Instagram extbrowser in force mode with an active user gesture', () => {
       Object.defineProperty(window.navigator, 'userAgent', {
         value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_4_1 like Mac OS X) AppleWebKit/605.1.15 Instagram 424.1.0.31.54 IABMV/1',
         writable: true,
+      });
+      Object.defineProperty(window.navigator, 'userActivation', {
+        value: { isActive: true },
+        writable: true,
+        configurable: true,
       });
 
       const navigated: string[] = [];
@@ -616,7 +632,7 @@ describe('InAppBrowserEscaper', () => {
         });
         expect(result).toBe(true);
 
-        // force mode reuses the same Instagram iOS tap path and navigates immediately.
+        // force mode reuses the same Instagram iOS tap path during a real user gesture.
         expect(navigated).toEqual([
           `instagram://extbrowser/?url=${encodeURIComponent('https://example.com')}`,
         ]);
