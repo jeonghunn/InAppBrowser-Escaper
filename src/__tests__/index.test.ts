@@ -289,6 +289,33 @@ describe('InAppBrowserEscaper', () => {
       }
     });
 
+    it('should not keep debug events enabled after a debug escape call', () => {
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_4_1 like Mac OS X) AppleWebKit/605.1.15 Instagram 424.1.0.31.54 IABMV/1',
+        writable: true,
+      });
+
+      const events: string[] = [];
+      const onDebug = (e: Event) => events.push((e as CustomEvent).detail.type);
+      window.addEventListener('inAppBrowserEscaper:debug', onDebug);
+
+      try {
+        InAppBrowserEscaper.escape({ fallbackUrl: 'https://example.com/debug-on', debug: true });
+        expect(events).toContain('escape:start');
+
+        document.querySelectorAll('[style*="z-index: 999999"]').forEach(el => el.remove());
+        events.length = 0;
+
+        InAppBrowserEscaper.escape({ fallbackUrl: 'https://example.com/debug-off' });
+        const button = document.querySelector('#escaper-open-btn') as HTMLButtonElement;
+        button?.click();
+
+        expect(events).toEqual([]);
+      } finally {
+        window.removeEventListener('inAppBrowserEscaper:debug', onDebug);
+      }
+    });
+
     it('should copy the URL to clipboard on the Instagram iOS tap path', () => {
       Object.defineProperty(window.navigator, 'userAgent', {
         value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_4_1 like Mac OS X) AppleWebKit/605.1.15 Instagram 424.1.0.31.54 IABMV/1',

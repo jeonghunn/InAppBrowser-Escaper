@@ -257,9 +257,10 @@ export class InAppBrowserEscaper {
   static escape(options: EscapeOptions = {}): boolean {
     const browserInfo = InAppBrowserDetector.analyze();
     
-    // Update debug mode setting
-    const config = { ...this.defaultOptions, ...options };
-    this.defaultOptions.debug = config.debug || false;
+    // Update debug mode for this escape call only.
+    const debug = options.debug === true;
+    const config = { ...this.defaultOptions, ...options, debug };
+    this.defaultOptions.debug = debug;
     this.emitDebugEvent('escape:start', {
       browserInfo,
       options: config,
