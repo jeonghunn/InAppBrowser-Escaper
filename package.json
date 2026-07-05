@@ -1,6 +1,6 @@
 {
   "name": "@jhrunning/inappbrowserescaper",
-  "version": "1.0.0",
+  "version": "1.0.1-beta.0",
   "description": "A TypeScript library to help users escape from in-app browsers like Instagram, Facebook, Telegram, etc.",
   "main": "dist/esm/index.js",
   "module": "dist/esm/index.js",
