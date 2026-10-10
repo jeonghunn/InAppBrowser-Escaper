@@ -303,8 +303,8 @@ export class InAppBrowserEscaper {
     // Auto-redirect from page load is blocked in recent Instagram versions, but a tapped button works.
     const requiresUserGesture = this.requiresInstagramIOSGesture(browserInfo);
 
-    // Show modal if explicitly requested, or when the app requires a user gesture.
-    if (config.showModal || requiresUserGesture) {
+    // Show the modal if requested, or if Instagram iOS still needs a user tap.
+    if (config.showModal || (requiresUserGesture && !this.hasActiveUserGesture())) {
       this.emitDebugEvent('escape:show-modal', {
         currentUrl,
         requiresUserGesture,
@@ -314,9 +314,13 @@ export class InAppBrowserEscaper {
       return true;
     }
 
-    // Otherwise, auto-redirect (default behavior)
+    // Preserve the active tap for Instagram iOS; other browsers use the generic redirect.
     this.emitDebugEvent('escape:auto-redirect', { currentUrl, browserInfo });
-    this.performRedirect(currentUrl, browserInfo);
+    if (requiresUserGesture) {
+      this.openInstagramIOSFromTap(currentUrl, browserInfo);
+    } else {
+      this.performRedirect(currentUrl, browserInfo);
+    }
     
     // Show quick instructions if explicitly requested
     if (config.showQuickInstructions) {
