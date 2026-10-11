@@ -13,7 +13,7 @@ A lightweight TypeScript library that helps users escape from in-app browsers (I
 
 https://github.com/user-attachments/assets/56dfa68e-ae6f-4640-ad71-bdfdd5999f78
 
-**[📱 Try the Interactive Demo](https://jhrun.com/develop/inappescaper/demo.html)** - Experience the library in action!
+**[📱 Try the Interactive Demo](https://jhrun.com/inappescaper/demo.html)** - Experience the library in action!
 
 </div>
 
