@@ -11,6 +11,9 @@ jobs:
     permissions:
       contents: read
       id-token: write # For npm provenance
+    outputs:
+      package-name: ${{ steps.metadata.outputs.name }}
+      package-version: ${{ steps.metadata.outputs.version }}
 
     steps:
       - name: Checkout code
@@ -23,19 +26,18 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
+      - name: Verify release tag
+        id: metadata
+        run: node scripts/release-metadata.js
+
       - name: Install dependencies
         run: npm ci
 
       - name: Run tests
         run: npm test
 
-      - name: Build project
-        run: npm run build
-
-      - name: Verify package contents
-        run: |
-          npm pack --dry-run
-          npx publint
+      - name: Verify installed npm package
+        run: npm run test:package
 
       - name: Publish to npm
         run: npm publish --provenance --access public
@@ -57,17 +59,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
           body: |
             ## Changes
             
-            See [CHANGELOG.md](./CHANGELOG.md) for details.
+            See [CHANGELOG.md](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/CHANGELOG.md) for details.
             
             ## Installation
             
             ```bash
-            npm install inappbrowserescaper@${{ github.ref_name }}
+            npm install ${{ needs.release.outputs.package-name }}@${{ needs.release.outputs.package-version }}
             ```
           draft: false
           prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
