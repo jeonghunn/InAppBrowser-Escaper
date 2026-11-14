@@ -55,8 +55,8 @@ try {
     assert.equal(typeof InAppBrowserDetector.analyze, 'function');
   `, 'commonjs');
 
-  // Supply the locked React peer and its declarations to the consumer.
-  for (const peer of ['react', '@types/react']) {
+  // Use the locked framework dependencies after testing the core-only install.
+  for (const peer of ['react', '@types/react', '@angular/core', '@angular/common', '@angular/compiler', 'rxjs']) {
     const destination = join(consumerModules, peer);
     mkdirSync(dirname(destination), { recursive: true });
     symlinkSync(join(project, 'node_modules', peer), destination, 'junction');
@@ -73,6 +73,24 @@ try {
     assert.equal(typeof EscapeButton, 'function');
     assert.equal(typeof useInAppBrowserEscaper, 'function');
   `, 'commonjs');
+
+  // The raw Node consumer uses Angular's JIT compiler because it has no app build.
+  runConsumer(`
+    import assert from 'node:assert/strict';
+    import '@angular/compiler';
+    import { createNgModule, Injector, PLATFORM_ID } from '@angular/core';
+    import { InAppBrowserEscaperModule, InAppBrowserEscaperService } from '${name}/angular';
+
+    const injector = Injector.create({ providers: [{ provide: PLATFORM_ID, useValue: 'server' }] });
+    const module = createNgModule(InAppBrowserEscaperModule, injector);
+    try {
+      const service = module.injector.get(InAppBrowserEscaperService);
+      assert.equal(service.escape(), false);
+      assert.equal(service.getBrowserInfo(), null);
+    } finally {
+      module.destroy();
+    }
+  `, 'module');
 
   writeFileSync(join(consumer, 'consumer.mts'), `
     import Escaper, { type EscapeOptions } from '${name}';
@@ -104,7 +122,7 @@ try {
   assert.equal(typeof window.InAppBrowserEscaper.InAppBrowserEscaper.escape, 'function');
   assert.equal(typeof window.InAppBrowserEscaper.InAppBrowserDetector.analyze, 'function');
 
-  console.log('Packed core, React, declarations, and browser bundle passed.');
+  console.log('Packed core, React, Angular, declarations, and browser bundle passed.');
 } finally {
   rmSync(consumer, { recursive: true, force: true });
 }

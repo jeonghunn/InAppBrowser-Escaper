@@ -5,21 +5,21 @@ import {
   Directive, 
   Input, 
   HostListener, 
-  OnInit, 
+  type OnInit,
   Component,
   NgModule 
 } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import {
   BehaviorSubject,
-  Observable,
+  type Observable,
 } from 'rxjs';
 import InAppBrowserEscaper,
 {
   InAppBrowserDetector,
   type BrowserInfo,
   type EscapeOptions,
-} from './index';
+} from './index.js';
 
 /**
  * Angular Service for InAppBrowserEscaper
@@ -133,9 +133,16 @@ export class InAppBrowserEscapeDirective implements OnInit {
       [ngStyle]="buttonStyle"
       (click)="handleEscape()"
       [attr.aria-label]="ariaLabel">
-      <ng-content>{{ buttonText }}</ng-content>
+      <span class="projected-label"><ng-content></ng-content></span>
+      <span class="default-label">{{ buttonText }}</span>
     </button>
-  `
+  `,
+  styles: [`
+    .projected-label:empty,
+    .projected-label:not(:empty) + .default-label {
+      display: none;
+    }
+  `]
 })
 export class InAppBrowserEscapeButtonComponent implements OnInit {
   @Input() buttonText = 'Open in Browser';

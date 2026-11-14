@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fixed ES module and CommonJS entry points for the core and React packages, and corrected the npm install command in GitHub release notes.
+- Added a native ES module entry point for the Angular adapter so Angular's ES module dependencies can load on Node 18.
 
 ## [1.0.1] - 2026-07-05
 
