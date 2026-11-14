@@ -13,7 +13,7 @@ A lightweight TypeScript library that helps users escape from in-app browsers (I
 
 https://github.com/user-attachments/assets/56dfa68e-ae6f-4640-ad71-bdfdd5999f78
 
-**[📱 Try the Interactive Demo](https://jhrun.com/develop/inappescaper/demo.html)** - Experience the library in action!
+**[📱 Try the Interactive Demo](https://jhrun.com/inappescaper/demo.html)** - Experience the library in action!
 
 </div>
 
@@ -195,7 +195,7 @@ Attempts to help the user escape from the in-app browser.
 **Options:**
 - `message?: string` - Custom message to display (default: "For the best experience, please open this in your browser")
 - `buttonText?: string` - Custom button text (default: "🚀 Open in Browser")
-- `showModal?: boolean` - Whether to show the escape modal (default: false; Instagram iOS may show one automatically to preserve a tap gesture)
+- `showModal?: boolean` - Whether to show the escape modal (default: false; Instagram iOS shows one automatically when no user gesture is active)
 - `fallbackUrl?: string` - Custom URL to redirect to (default: current URL)
 - `force?: boolean` - Force an escape attempt even when not in an in-app browser; Instagram iOS still requires an active user gesture (default: false)
 - `showQuickInstructions?: boolean` - Show quick instructions overlay with platform-specific guidance (default: false)
@@ -261,12 +261,14 @@ if (InAppBrowserDetector.isInAppBrowser()) {
 ```typescript
 const browserInfo = InAppBrowserDetector.analyze();
 if (browserInfo.isInApp && browserInfo.appName === 'instagram') {
-  // Instagram iOS needs a real tap, so the library shows a gesture-preserving modal.
+  // Instagram iOS shows a modal unless escape() runs during an active user tap.
   InAppBrowserEscaper.escape({
     message: 'This app works best in your browser'
   });
 }
 ```
+
+For Instagram iOS, call `escape()` directly inside a click/tap handler to use the active gesture and skip the automatic modal. Earlier interaction (`hasBeenActive`) is not enough; if activation has expired or the User Activation API is unavailable, the modal remains. Set `showModal: true` to always show the modal in normal (non-force) mode.
 
 ## 🌐 Browser Support
 
