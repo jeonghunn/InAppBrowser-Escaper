@@ -163,6 +163,11 @@ export class MyComponent implements OnInit {
 }
 ```
 
+Use the Angular entry point with `import`. When a CommonJS script on Node 18
+loads an Angular version distributed as ES modules, use dynamic
+`import('@jhrunning/inappbrowserescaper/angular')`. A standalone Node JIT test
+also needs to load `@angular/compiler` before loading the adapter.
+
 ## 📚 API Reference
 
 ### InAppBrowserDetector
