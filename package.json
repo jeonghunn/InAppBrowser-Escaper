@@ -2,19 +2,31 @@
   "name": "@jhrunning/inappbrowserescaper",
   "version": "1.0.1",
   "description": "A TypeScript library to help users escape from in-app browsers like Instagram, Facebook, Telegram, etc.",
-  "main": "dist/esm/index.js",
+  "type": "commonjs",
+  "main": "dist/index.js",
   "module": "dist/esm/index.js",
-  "types": "dist/esm/index.d.ts",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/esm/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/index.js",
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
       "default": "./dist/esm/index.js"
     },
     "./react": {
-      "types": "./dist/react/react.d.ts",
-      "require": "./dist/react/react.js",
+      "import": {
+        "types": "./dist/react/react.d.ts",
+        "default": "./dist/react/react.js"
+      },
+      "require": {
+        "types": "./dist/react-cjs/react.d.ts",
+        "default": "./dist/react-cjs/react.js"
+      },
       "default": "./dist/react/react.js"
     },
     "./angular": {
@@ -26,7 +38,8 @@
   },
   "files": [
     "dist",
-    "scripts",
+    "scripts/build-browser.js",
+    "scripts/write-module-type.js",
     "src/react.tsx",
     "src/angular.ts",
     "src/examples",
@@ -36,16 +49,18 @@
   "scripts": {
     "build": "rimraf dist && npm run build:cjs && npm run build:esm && npm run build:browser && npm run build:react && npm run build:angular && npm run build:browser-wrapper",
     "build:cjs": "tsc",
-    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:esm": "tsc -p tsconfig.esm.json && node scripts/write-module-type.js dist/esm",
     "build:node": "tsc",
     "build:browser": "tsc -p tsconfig.browser.json",
     "build:browser-wrapper": "node scripts/build-browser.js",
-    "build:react": "tsc -p tsconfig.react.json",
+    "build:react": "tsc -p tsconfig.react.json && node scripts/write-module-type.js dist/react && tsc -p tsconfig.react-cjs.json",
     "build:angular": "tsc -p tsconfig.angular.json",
     "build:all": "rimraf dist && npm run build:cjs && npm run build:esm && npm run build:browser && npm run build:react && npm run build:angular && npm run build:browser-wrapper",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "lint:package": "publint --strict --level warning",
+    "test:package": "npm run build && node scripts/test-package.js",
     "prepublishOnly": "npm run build && npm test",
     "dev": "tsc --watch"
   },
@@ -102,6 +117,7 @@
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
     "jsdom": "^26.1.0",
+    "publint": "0.3.25",
     "react": "^18.2.0",
     "rimraf": "^6.0.1",
     "rxjs": "~7.8.0",

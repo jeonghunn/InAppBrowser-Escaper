@@ -7,7 +7,7 @@ import InAppBrowserEscaper,
 {
   InAppBrowserDetector,
   type BrowserInfo,
-} from './index';
+} from './index.js';
 
 /**
  * React Hook for InAppBrowserEscaper
