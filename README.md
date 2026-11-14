@@ -112,6 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 ### React
 
+The React adapter requires React 18 or later. Projects using React 16 or 17 must upgrade React before installing version 2.0.0.
+
 ```tsx
 import React from 'react';
 import { useInAppBrowserEscaper } from '@jhrunning/inappbrowserescaper/react';
