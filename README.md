@@ -91,7 +91,8 @@ if (InAppBrowserDetector.isInAppBrowser()) {
   // Show escape modal
   InAppBrowserEscaper.escape({
     message: 'For the best experience, please open this in your browser',
-    buttonText: 'Open in Browser'
+    buttonText: 'Open in Browser',
+    showModal: true
   });
 }
 ```
@@ -101,12 +102,12 @@ if (InAppBrowserDetector.isInAppBrowser()) {
 ```typescript
 document.addEventListener('DOMContentLoaded', () => {
   if (InAppBrowserDetector.isInAppBrowser()) {
-    InAppBrowserEscaper.escape({
-      message: 'For the best experience, please open this in your browser'
-    });
+    InAppBrowserEscaper.escape();
   }
 });
 ```
+
+Instagram iOS may block page-load redirects. Call `escape()` directly inside your own button's click handler, or pass `showModal: true` to use the library's button.
 
 ## 🎨 Framework Integrations
 
@@ -190,14 +191,14 @@ Returns the detected app name if in an in-app browser.
 ### InAppBrowserEscaper
 
 #### `escape(options?: EscapeOptions): boolean`
-Attempts to help the user escape from the in-app browser.
+Returns `true` when it attempts a redirect or shows the escape modal, and `false` when it skips the request. The return value does not tell you whether an external browser opened.
 
 **Options:**
 - `message?: string` - Custom message to display (default: "For the best experience, please open this in your browser")
 - `buttonText?: string` - Custom button text (default: "🚀 Open in Browser")
-- `showModal?: boolean` - Whether to show the escape modal (default: false; Instagram iOS shows one automatically when no user gesture is active)
-- `fallbackUrl?: string` - Custom URL to redirect to (default: current URL)
-- `force?: boolean` - Force an escape attempt even when not in an in-app browser; Instagram iOS still requires an active user gesture (default: false)
+- `showModal?: boolean` - Set to `true` to show the escape modal. When false or omitted, the library attempts a redirect without showing the modal.
+- `fallbackUrl?: string` - Custom URL to redirect to (default: current URL). On Instagram iOS, relative URLs resolve against the current page. If the destination is invalid or uses a scheme other than HTTP or HTTPS, `escape()` returns `false`.
+- `force?: boolean` - Attempt a redirect even outside an in-app browser. This takes precedence over `showModal` (default: false).
 - `showQuickInstructions?: boolean` - Show quick instructions overlay with platform-specific guidance (default: false)
 
 #### `copyUrlToClipboard(url?: string): Promise<boolean>`
@@ -242,7 +243,8 @@ if (InAppBrowserDetector.isInAppBrowser()) {
 if (InAppBrowserDetector.isInAppBrowser()) {
   InAppBrowserEscaper.escape({
     message: 'For secure checkout and the best shopping experience, please open this in your browser',
-    buttonText: '🛍️ Shop Securely'
+    buttonText: '🛍️ Shop Securely',
+    showModal: true
   });
 }
 ```
@@ -252,7 +254,8 @@ if (InAppBrowserDetector.isInAppBrowser()) {
 if (InAppBrowserDetector.isInAppBrowser()) {
   InAppBrowserEscaper.escape({
     message: 'For better reading experience and full functionality, open this article in your browser',
-    buttonText: '📖 Read in Browser'
+    buttonText: '📖 Read in Browser',
+    showModal: true
   });
 }
 ```
@@ -261,14 +264,14 @@ if (InAppBrowserDetector.isInAppBrowser()) {
 ```typescript
 const browserInfo = InAppBrowserDetector.analyze();
 if (browserInfo.isInApp && browserInfo.appName === 'instagram') {
-  // Instagram iOS shows a modal unless escape() runs during an active user tap.
   InAppBrowserEscaper.escape({
-    message: 'This app works best in your browser'
+    message: 'This app works best in your browser',
+    showModal: true
   });
 }
 ```
 
-For Instagram iOS, call `escape()` directly inside a click/tap handler to use the active gesture and skip the automatic modal. Earlier interaction (`hasBeenActive`) is not enough; if activation has expired or the User Activation API is unavailable, the modal remains. Set `showModal: true` to always show the modal in normal (non-force) mode.
+With your own button on Instagram iOS, call `escape({ showModal: false })` in its click handler before any `await`. The redirect attempt starts synchronously, even if the User Activation API is unavailable. The library attempts to copy the URL as a backup when the user taps its modal button.
 
 ## 🌐 Browser Support
 

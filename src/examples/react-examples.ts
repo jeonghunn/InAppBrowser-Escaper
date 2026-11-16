@@ -42,6 +42,7 @@ function App() {
     <InAppBrowserEscaperProvider
       autoEscape={true}
       escapeOptions={{
+        showModal: true,
         message: 'For the best experience, please open this in your browser',
         buttonText: 'Open in Browser'
       }}
@@ -65,9 +66,6 @@ function Header() {
       <EscapeButton 
         className="escape-btn"
         style={{ background: '#007AFF', color: 'white' }}
-        escapeOptions={{
-          message: 'Open this page in your default browser for the best experience'
-        }}
       >
         🌐 Open in Browser
       </EscapeButton>
