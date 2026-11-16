@@ -30,19 +30,104 @@ describe('In-app browser escape user activation', () => {
     document.body.innerHTML = '';
   });
 
-  it.each([undefined, false])('hands off synchronously with active activation and showModal=%s', showModal => {
-    Object.defineProperty(navigator, 'userActivation', {
-      value: { isActive: true }, configurable: true,
+  describe.each([
+    { state: 'active', activation: { isActive: true, hasBeenActive: true } },
+    { state: 'inactive', activation: { isActive: false, hasBeenActive: true } },
+    { state: 'unavailable', activation: undefined },
+  ])('when user activation is $state', ({ activation }) => {
+    beforeEach(() => {
+      if (activation !== undefined) {
+        Object.defineProperty(navigator, 'userActivation', {
+          value: activation, configurable: true,
+        });
+      }
     });
 
-    expect(InAppBrowserEscaper.escape({ fallbackUrl: url, showModal, debug: true })).toBe(true);
+    it.each([
+      {},
+      { showModal: false },
+      { force: true },
+      { force: true, showModal: false },
+      { force: true, showModal: true },
+    ])('attempts navigation synchronously for %j', options => {
+      expect(InAppBrowserEscaper.escape({ fallbackUrl: url, ...options })).toBe(true);
 
-    // Inspect immediately: navigation must be initiated before escape() returns.
+      expect(navigate).toHaveBeenCalledTimes(1);
+      expect(navigate).toHaveBeenCalledWith(`instagram://extbrowser/?url=${encodeURIComponent(url)}`);
+      expect(performRedirect).not.toHaveBeenCalled();
+      expect(document.querySelector('#escaper-open-btn')).toBeNull();
+      expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
+    });
+
+    it('waits for the modal button when showModal is true', () => {
+      expect(InAppBrowserEscaper.escape({ fallbackUrl: url, showModal: true })).toBe(true);
+
+      const button = document.querySelector<HTMLButtonElement>('#escaper-open-btn');
+      expect(button).not.toBeNull();
+      expect(navigate).not.toHaveBeenCalled();
+      expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
+
+      button?.click();
+
+      expect(navigate).toHaveBeenCalledTimes(1);
+      expect(navigate).toHaveBeenCalledWith(`instagram://extbrowser/?url=${encodeURIComponent(url)}`);
+      expect(performRedirect).not.toHaveBeenCalled();
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(url);
+    });
+  });
+
+  it.each([
+    ['/checkout?source=instagram#payment', `${window.location.origin}/checkout?source=instagram#payment`],
+    ['HTTPS://EXAMPLE.COM/checkout', 'https://example.com/checkout'],
+  ])('sends the resolved fallback %s through the Instagram handoff', (fallbackUrl, destination) => {
+    expect(InAppBrowserEscaper.escape({ fallbackUrl })).toBe(true);
+
+    expect(navigate).toHaveBeenCalledWith(`instagram://extbrowser/?url=${encodeURIComponent(destination)}`);
+  });
+
+  it('copies the resolved destination when the modal button is tapped', () => {
+    const destination = `${window.location.origin}/checkout`;
+    expect(InAppBrowserEscaper.escape({ fallbackUrl: '/checkout', showModal: true })).toBe(true);
+
+    document.querySelector<HTMLButtonElement>('#escaper-open-btn')?.click();
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(destination);
+    expect(navigate).toHaveBeenCalledWith(`instagram://extbrowser/?url=${encodeURIComponent(destination)}`);
+  });
+
+  describe.each([
+    { mode: 'direct', options: { showModal: false } },
+    { mode: 'modal', options: { showModal: true } },
+    { mode: 'force', options: { force: true } },
+  ])('in $mode mode', ({ options }) => {
+    it.each([
+      ' JaVa\tScRiPt:void(0)',
+      'data:text/html,hello',
+      'https://[invalid]',
+    ])('skips invalid or unsupported destination %s', fallbackUrl => {
+      expect(InAppBrowserEscaper.escape({ ...options, fallbackUrl })).toBe(false);
+
+      expect(navigate).not.toHaveBeenCalled();
+      expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
+      expect(document.querySelector('#escaper-open-btn')).toBeNull();
+    });
+  });
+
+  it('keeps input focus when a direct redirect stays on the page', async () => {
+    const writeText = jest.fn().mockRejectedValue(new Error('Clipboard access denied'));
+    jest.replaceProperty(navigator, 'clipboard', { ...navigator.clipboard, writeText });
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    input.focus();
+    expect(document.activeElement).toBe(input);
+
+    InAppBrowserEscaper.escape({ fallbackUrl: url, showModal: false });
     expect(navigate).toHaveBeenCalledTimes(1);
-    expect(navigate).toHaveBeenCalledWith(`instagram://extbrowser/?url=${encodeURIComponent(url)}`);
-    expect(performRedirect).not.toHaveBeenCalled();
-    expect(document.querySelector('#escaper-open-btn')).toBeNull();
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(url);
+    // The navigation stub leaves the page in place. Let any clipboard rejection settle.
+    await Promise.resolve();
+
+    expect(document.activeElement).toBe(input);
+    expect(writeText).not.toHaveBeenCalled();
   });
 
   it.each([undefined, false])('hands off synchronously with debug=%s', debug => {
@@ -59,7 +144,7 @@ describe('In-app browser escape user activation', () => {
     expect(navigate).toHaveBeenCalledWith(`instagram://extbrowser/?url=${encodeURIComponent(url)}`);
     expect(performRedirect).not.toHaveBeenCalled();
     expect(document.querySelector('#escaper-open-btn')).toBeNull();
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(url);
+    expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
     expect(log).not.toHaveBeenCalled();
     expect(warn).not.toHaveBeenCalled();
     expect(dispatchEvent).not.toHaveBeenCalled();
@@ -97,32 +182,5 @@ describe('In-app browser escape user activation', () => {
     expect(navigate).toHaveBeenCalledTimes(1);
     expect(navigate).toHaveBeenCalledWith(redirectUrl);
     expect(document.querySelector('#escaper-open-btn')).toBeNull();
-  });
-
-  it.each([
-    { isActive: false, hasBeenActive: false },
-    { isActive: false, hasBeenActive: true },
-    undefined,
-  ])('keeps the modal without current activation: %j', activation => {
-    Object.defineProperty(navigator, 'userActivation', {
-      value: activation, configurable: true,
-    });
-
-    expect(InAppBrowserEscaper.escape({ fallbackUrl: url, showModal: false, debug: true })).toBe(true);
-    expect(document.querySelector('#escaper-open-btn')).not.toBeNull();
-    expect(navigate).not.toHaveBeenCalled();
-    expect(performRedirect).not.toHaveBeenCalled();
-    expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
-  });
-
-  it('honors an explicit modal even during active activation', () => {
-    Object.defineProperty(navigator, 'userActivation', {
-      value: { isActive: true }, configurable: true,
-    });
-
-    expect(InAppBrowserEscaper.escape({ fallbackUrl: url, showModal: true, debug: true })).toBe(true);
-    expect(document.querySelector('#escaper-open-btn')).not.toBeNull();
-    expect(navigate).not.toHaveBeenCalled();
-    expect(performRedirect).not.toHaveBeenCalled();
   });
 });
