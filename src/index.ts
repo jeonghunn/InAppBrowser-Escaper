@@ -433,7 +433,7 @@ export class InAppBrowserEscaper {
    * Gets platform-specific escape instructions
    */
   private static getEscapeInstructions(browserInfo: BrowserInfo): string {
-    if (browserInfo.platform === 'ios' && browserInfo.appName === 'instagram') {
+    if (this.isInstagramIOS(browserInfo)) {
       return `
         <strong>On Instagram iOS:</strong><br>
         1. Tap "Open in Browser" below<br>
