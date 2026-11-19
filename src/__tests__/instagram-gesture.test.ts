@@ -76,6 +76,21 @@ describe('In-app browser escape user activation', () => {
     });
   });
 
+  it('attempts navigation during the modal click even when copying is unavailable', () => {
+    const browser: { clipboard?: Clipboard } = navigator;
+    jest.replaceProperty(browser, 'clipboard', undefined);
+    const copyFallback = jest.spyOn(document, 'execCommand').mockReturnValueOnce(false);
+
+    InAppBrowserEscaper.escape({ fallbackUrl: url, showModal: true });
+    expect(navigate).not.toHaveBeenCalled();
+
+    document.querySelector<HTMLButtonElement>('#escaper-open-btn')?.click();
+
+    expect(copyFallback).toHaveBeenCalledWith('copy');
+    expect(navigate).toHaveBeenCalledTimes(1);
+    expect(navigate).toHaveBeenCalledWith(`instagram://extbrowser/?url=${encodeURIComponent(url)}`);
+  });
+
   it.each([
     ['/checkout?source=instagram#payment', `${window.location.origin}/checkout?source=instagram#payment`],
     ['HTTPS://EXAMPLE.COM/checkout', 'https://example.com/checkout'],
