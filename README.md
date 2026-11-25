@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 ```
 
-Instagram iOS may block page-load redirects. Call `escape()` directly inside your own button's click handler, or pass `showModal: true` to use the library's button.
+Instagram iOS may block page-load redirects.
 
 ## 🎨 Framework Integrations
 
@@ -228,13 +228,17 @@ div[style*="z-index: 999999"] > div {
 // Create a custom notification instead of using the modal
 if (InAppBrowserDetector.isInAppBrowser()) {
   const notification = document.createElement('div');
-  notification.innerHTML = `
-    <span>You're in an in-app browser. </span>
-    <button onclick="InAppBrowserEscaper.escape()">Open in Browser</button>
-  `;
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = 'Open in Browser';
+  button.addEventListener('click', () => InAppBrowserEscaper.escape());
+
+  notification.append("You're in an in-app browser. ", button);
   document.body.prepend(notification);
 }
 ```
+
+On Instagram iOS, call `escape()` directly in your button’s click handler, before any `await`, so the redirect starts during the tap. To use the library’s button instead, pass `showModal: true`. Tapping that button also attempts to copy the destination URL as a backup.
 
 ## 🔧 Configuration Examples
 
@@ -270,8 +274,6 @@ if (browserInfo.isInApp && browserInfo.appName === 'instagram') {
   });
 }
 ```
-
-With your own button on Instagram iOS, call `escape({ showModal: false })` in its click handler before any `await`. The redirect attempt starts synchronously, even if the User Activation API is unavailable. The library attempts to copy the URL as a backup when the user taps its modal button.
 
 ## 🌐 Browser Support
 
