@@ -67,6 +67,7 @@ import { Component } from '@angular/core';
         appInAppEscape 
         [autoEscape]="true"
         [escapeOptions]="{
+          showModal: true,
           message: 'Open this page in your default browser for the best experience'
         }"
         class="escape-btn">
@@ -88,9 +89,6 @@ import { Component } from '@angular/core';
         buttonText="🌐 Open in Browser"
         buttonClass="my-escape-button"
         [buttonStyle]="{ 'background': '#007AFF', 'color': 'white' }"
-        [escapeOptions]="{
-          message: 'For the best experience, open this in your browser'
-        }"
         ariaLabel="Open in external browser">
       </app-in-app-escape-button>
       

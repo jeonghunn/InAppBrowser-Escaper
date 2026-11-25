@@ -220,7 +220,7 @@ if (InAppBrowserDetector.isInAppBrowser()) {
         <h3>Auto-redirect (default behavior):</h3>
         <pre><code>const browserInfo = InAppBrowserDetector.analyze();
 if (browserInfo.appName === 'instagram') {
-  // Instagram iOS shows a gesture-preserving modal when needed
+  // On Instagram iOS, call this from a click handler for the best chance of opening the browser.
   InAppBrowserEscaper.escape();
 }</code></pre>
 

@@ -50,14 +50,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const browserInfo = InAppBrowserDetector.analyze();
   
   if (browserInfo.isInApp) {
-    // Use the default escape behavior for Instagram and Facebook.
-    // Instagram iOS shows a tap-preserving modal when needed.
-    if (browserInfo.appName === 'instagram' || browserInfo.appName === 'facebook') {
+    // Try direct navigation for Facebook and Instagram Android.
+    const isInstagramAndroid = browserInfo.appName === 'instagram' && browserInfo.platform === 'android';
+    if (isInstagramAndroid || browserInfo.appName === 'facebook') {
       InAppBrowserEscaper.escape({
         showModal: false
       });
     } else {
-      // Show modal for other apps
+      // Show a button the user can tap, including on Instagram iOS.
       InAppBrowserEscaper.escape({
         message: `You're browsing in ${browserInfo.appName}. For the best experience, please open this in your browser.`,
         showModal: true

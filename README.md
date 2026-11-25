@@ -13,7 +13,7 @@ A lightweight TypeScript library that helps users escape from in-app browsers (I
 
 https://github.com/user-attachments/assets/56dfa68e-ae6f-4640-ad71-bdfdd5999f78
 
-**[📱 Try the Interactive Demo](https://jhrun.com/develop/inappescaper/demo.html)** - Experience the library in action!
+**[📱 Try the Interactive Demo](https://jhrun.com/inappescaper/demo.html)** - Experience the library in action!
 
 </div>
 
@@ -91,7 +91,8 @@ if (InAppBrowserDetector.isInAppBrowser()) {
   // Show escape modal
   InAppBrowserEscaper.escape({
     message: 'For the best experience, please open this in your browser',
-    buttonText: 'Open in Browser'
+    buttonText: 'Open in Browser',
+    showModal: true
   });
 }
 ```
@@ -101,12 +102,12 @@ if (InAppBrowserDetector.isInAppBrowser()) {
 ```typescript
 document.addEventListener('DOMContentLoaded', () => {
   if (InAppBrowserDetector.isInAppBrowser()) {
-    InAppBrowserEscaper.escape({
-      message: 'For the best experience, please open this in your browser'
-    });
+    InAppBrowserEscaper.escape();
   }
 });
 ```
+
+Instagram iOS may block page-load redirects.
 
 ## 🎨 Framework Integrations
 
@@ -190,14 +191,14 @@ Returns the detected app name if in an in-app browser.
 ### InAppBrowserEscaper
 
 #### `escape(options?: EscapeOptions): boolean`
-Attempts to help the user escape from the in-app browser.
+Returns `true` when it attempts a redirect or shows the escape modal, and `false` when it skips the request. The return value does not tell you whether an external browser opened.
 
 **Options:**
 - `message?: string` - Custom message to display (default: "For the best experience, please open this in your browser")
 - `buttonText?: string` - Custom button text (default: "🚀 Open in Browser")
-- `showModal?: boolean` - Whether to show the escape modal (default: false; Instagram iOS may show one automatically to preserve a tap gesture)
-- `fallbackUrl?: string` - Custom URL to redirect to (default: current URL)
-- `force?: boolean` - Force an escape attempt even when not in an in-app browser; Instagram iOS still requires an active user gesture (default: false)
+- `showModal?: boolean` - Set to `true` to show the escape modal. When false or omitted, the library attempts a redirect without showing the modal.
+- `fallbackUrl?: string` - Custom URL to redirect to (default: current URL). On Instagram iOS, relative URLs resolve against the current page. If the destination is invalid or uses a scheme other than HTTP or HTTPS, `escape()` returns `false`.
+- `force?: boolean` - Attempt a redirect even outside an in-app browser. This takes precedence over `showModal` (default: false).
 - `showQuickInstructions?: boolean` - Show quick instructions overlay with platform-specific guidance (default: false)
 
 #### `copyUrlToClipboard(url?: string): Promise<boolean>`
@@ -227,13 +228,17 @@ div[style*="z-index: 999999"] > div {
 // Create a custom notification instead of using the modal
 if (InAppBrowserDetector.isInAppBrowser()) {
   const notification = document.createElement('div');
-  notification.innerHTML = `
-    <span>You're in an in-app browser. </span>
-    <button onclick="InAppBrowserEscaper.escape()">Open in Browser</button>
-  `;
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = 'Open in Browser';
+  button.addEventListener('click', () => InAppBrowserEscaper.escape());
+
+  notification.append("You're in an in-app browser. ", button);
   document.body.prepend(notification);
 }
 ```
+
+On Instagram iOS, call `escape()` directly in your button’s click handler, before any `await`, so the redirect starts during the tap. To use the library’s button instead, pass `showModal: true`. Tapping that button also attempts to copy the destination URL as a backup.
 
 ## 🔧 Configuration Examples
 
@@ -242,7 +247,8 @@ if (InAppBrowserDetector.isInAppBrowser()) {
 if (InAppBrowserDetector.isInAppBrowser()) {
   InAppBrowserEscaper.escape({
     message: 'For secure checkout and the best shopping experience, please open this in your browser',
-    buttonText: '🛍️ Shop Securely'
+    buttonText: '🛍️ Shop Securely',
+    showModal: true
   });
 }
 ```
@@ -252,7 +258,8 @@ if (InAppBrowserDetector.isInAppBrowser()) {
 if (InAppBrowserDetector.isInAppBrowser()) {
   InAppBrowserEscaper.escape({
     message: 'For better reading experience and full functionality, open this article in your browser',
-    buttonText: '📖 Read in Browser'
+    buttonText: '📖 Read in Browser',
+    showModal: true
   });
 }
 ```
@@ -261,9 +268,9 @@ if (InAppBrowserDetector.isInAppBrowser()) {
 ```typescript
 const browserInfo = InAppBrowserDetector.analyze();
 if (browserInfo.isInApp && browserInfo.appName === 'instagram') {
-  // Instagram iOS needs a real tap, so the library shows a gesture-preserving modal.
   InAppBrowserEscaper.escape({
-    message: 'This app works best in your browser'
+    message: 'This app works best in your browser',
+    showModal: true
   });
 }
 ```

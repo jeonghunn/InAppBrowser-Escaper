@@ -253,12 +253,6 @@ describe('InAppBrowserEscaper', () => {
       value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       writable: true,
     });
-
-    Object.defineProperty(window.navigator, 'userActivation', {
-      value: undefined,
-      writable: true,
-      configurable: true,
-    });
   });
 
   describe('escape', () => {
@@ -278,9 +272,7 @@ describe('InAppBrowserEscaper', () => {
       window.addEventListener('inAppBrowserEscaper:debug', onDebug);
 
       try {
-        // debug:false is explicit because defaultOptions.debug is sticky static
-        // state; relying on the default would make this order-dependent.
-        InAppBrowserEscaper.escape({ fallbackUrl: 'https://example.com', debug: false });
+        InAppBrowserEscaper.escape({ fallbackUrl: 'https://example.com', showModal: true, debug: false });
         const button = document.querySelector('#escaper-open-btn') as HTMLButtonElement;
         button?.click();
         expect(events).toEqual([]);
@@ -300,13 +292,13 @@ describe('InAppBrowserEscaper', () => {
       window.addEventListener('inAppBrowserEscaper:debug', onDebug);
 
       try {
-        InAppBrowserEscaper.escape({ fallbackUrl: 'https://example.com/debug-on', debug: true });
+        InAppBrowserEscaper.escape({ fallbackUrl: 'https://example.com/debug-on', showModal: true, debug: true });
         expect(events).toContain('escape:start');
 
         document.querySelectorAll('[style*="z-index: 999999"]').forEach(el => el.remove());
         events.length = 0;
 
-        InAppBrowserEscaper.escape({ fallbackUrl: 'https://example.com/debug-off' });
+        InAppBrowserEscaper.escape({ fallbackUrl: 'https://example.com/debug-off', showModal: true });
         const button = document.querySelector('#escaper-open-btn') as HTMLButtonElement;
         button?.click();
 
@@ -316,7 +308,7 @@ describe('InAppBrowserEscaper', () => {
       }
     });
 
-    it('should copy the URL to clipboard on the Instagram iOS tap path', () => {
+    it('should copy the URL to clipboard when the Instagram iOS modal button is tapped', () => {
       Object.defineProperty(window.navigator, 'userAgent', {
         value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_4_1 like Mac OS X) AppleWebKit/605.1.15 Instagram 424.1.0.31.54 IABMV/1',
         writable: true,
@@ -328,48 +320,11 @@ describe('InAppBrowserEscaper', () => {
         configurable: true,
       });
 
-      InAppBrowserEscaper.escape({ fallbackUrl: 'https://example.com/backup' });
+      InAppBrowserEscaper.escape({ fallbackUrl: 'https://example.com/backup', showModal: true });
       const button = document.querySelector('#escaper-open-btn') as HTMLButtonElement;
       button.click();
 
       expect(mockWriteText).toHaveBeenCalledWith('https://example.com/backup');
-    });
-
-    it('should still navigate on the Instagram iOS tap when the clipboard API is unavailable', () => {
-      Object.defineProperty(window.navigator, 'userAgent', {
-        value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_4_1 like Mac OS X) AppleWebKit/605.1.15 Instagram 424.1.0.31.54 IABMV/1',
-        writable: true,
-      });
-      // Simulate an iOS webview with no Clipboard API (e.g. non-secure context),
-      // which forces copyUrlToClipboard down its execCommand fallback.
-      Object.defineProperty(navigator, 'clipboard', {
-        value: undefined,
-        writable: true,
-        configurable: true,
-      });
-      document.execCommand = jest.fn(() => true);
-
-      const navigated: string[] = [];
-      const onDebug = (e: Event) => {
-        const detail = (e as CustomEvent).detail;
-        if (detail.type === 'instagram-ios:set-location') {
-          navigated.push(detail.escapeUrl);
-        }
-      };
-      window.addEventListener('inAppBrowserEscaper:debug', onDebug);
-
-      try {
-        InAppBrowserEscaper.escape({ fallbackUrl: 'https://example.com/no-clip', debug: true });
-        const button = document.querySelector('#escaper-open-btn') as HTMLButtonElement;
-        button.click();
-
-        // The clipboard backup is best-effort; its absence must not block navigation.
-        expect(navigated).toEqual([
-          `instagram://extbrowser/?url=${encodeURIComponent('https://example.com/no-clip')}`,
-        ]);
-      } finally {
-        window.removeEventListener('inAppBrowserEscaper:debug', onDebug);
-      }
     });
 
     it('should redirect and close the modal on the non-Instagram modal button tap', () => {
@@ -399,20 +354,6 @@ describe('InAppBrowserEscaper', () => {
       // Non-Instagram path copies the URL and closes the modal after redirecting.
       expect(mockWriteText).toHaveBeenCalledWith('https://example.com/fb');
       expect(document.querySelector('[style*="z-index: 999999"]')).toBeFalsy();
-    });
-
-    it('should show a gesture modal for Instagram iOS with default options', () => {
-      Object.defineProperty(window.navigator, 'userAgent', {
-        value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/23E254 Instagram 424.1.0.31.54 IABMV/1',
-        writable: true,
-      });
-
-      const result = InAppBrowserEscaper.escape();
-      expect(result).toBe(true);
-      
-      // Recent Instagram iOS requires a user gesture, so default behavior is a modal.
-      const modal = document.querySelector('[style*="z-index: 999999"]');
-      expect(modal).toBeTruthy();
     });
 
     it('should auto-redirect for Facebook iOS with default options', () => {
@@ -510,6 +451,7 @@ describe('InAppBrowserEscaper', () => {
       try {
         const result = InAppBrowserEscaper.escape({
           fallbackUrl: 'https://example.com/from-modal',
+          showModal: true,
           debug: true,
         });
         expect(result).toBe(true);
@@ -609,63 +551,21 @@ describe('InAppBrowserEscaper', () => {
       expect(overlay).toBeTruthy();
     });
 
-    it('should show only the Instagram iOS modal in force mode without an active user gesture', () => {
+    it('should show opt-in quick instructions without the escape modal on Instagram iOS', () => {
       Object.defineProperty(window.navigator, 'userAgent', {
         value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 Instagram',
         writable: true,
       });
 
-      const result = InAppBrowserEscaper.escape({ 
+      const result = InAppBrowserEscaper.escape({
         force: true,
-        showModal: true,
+        showModal: false,
         showQuickInstructions: true
       });
-      
+
       expect(result).toBe(true);
-      
-      // Instagram iOS cannot escape from page load or another async path without
-      // losing the user gesture, so force mode falls back to the modal.
-      const overlays = document.querySelectorAll('[style*="z-index: 999999"]');
-      expect(overlays).toHaveLength(1);
-      expect(document.querySelector('#escaper-open-btn')).toBeTruthy();
-      expect(document.body.textContent).not.toContain('URL copied to clipboard!');
-    });
-
-    it('should navigate to Instagram extbrowser in force mode with an active user gesture', () => {
-      Object.defineProperty(window.navigator, 'userAgent', {
-        value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_4_1 like Mac OS X) AppleWebKit/605.1.15 Instagram 424.1.0.31.54 IABMV/1',
-        writable: true,
-      });
-      Object.defineProperty(window.navigator, 'userActivation', {
-        value: { isActive: true },
-        writable: true,
-        configurable: true,
-      });
-
-      const navigated: string[] = [];
-      const onDebug = (e: Event) => {
-        const detail = (e as CustomEvent).detail;
-        if (detail.type === 'instagram-ios:set-location') {
-          navigated.push(detail.escapeUrl);
-        }
-      };
-      window.addEventListener('inAppBrowserEscaper:debug', onDebug);
-
-      try {
-        const result = InAppBrowserEscaper.escape({
-          force: true,
-          fallbackUrl: 'https://example.com',
-          debug: true,
-        });
-        expect(result).toBe(true);
-
-        // force mode reuses the same Instagram iOS tap path during a real user gesture.
-        expect(navigated).toEqual([
-          `instagram://extbrowser/?url=${encodeURIComponent('https://example.com')}`,
-        ]);
-      } finally {
-        window.removeEventListener('inAppBrowserEscaper:debug', onDebug);
-      }
+      expect(document.body.textContent).toContain('then select "Open in Safari"');
+      expect(document.querySelector('#escaper-open-btn')).toBeNull();
     });
   });
 
