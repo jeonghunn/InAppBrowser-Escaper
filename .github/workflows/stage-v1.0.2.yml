@@ -1,0 +1,27 @@
+name: Stage npm release 1.0.2
+on:
+  push:
+    branches: [ops/stage-v1.0.2]
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 14930a6e0e2016b7a0e8f8cedb66627a2c45fdb6
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          registry-url: https://registry.npmjs.org
+      - run: npm install --global npm@11.19.1
+      - run: npm ci
+      - run: npm test -- --runInBand
+      - run: npm run build
+      - run: npm pack
+      - run: npm stage publish ./jhrunning-inappbrowserescaper-1.0.2.tgz --provenance --access public --tag latest
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
